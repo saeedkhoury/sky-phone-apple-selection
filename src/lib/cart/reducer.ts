@@ -7,9 +7,10 @@ export const MAX_LINE_QUANTITY = 10
  * Upper bounds for state restored from localStorage, which the user can edit
  * freely in devtools. Nothing here is a security control — there is no backend
  * to defraud — but it keeps an edited payload from rendering absurd totals or
- * bloating every subsequent write. $1,000,000 in cents.
+ * bloating every subsequent write. ₪100,000 comfortably clears the most
+ * expensive thing the shop sells (₪8,990).
  */
-export const MAX_UNIT_PRICE = 100_000_000
+export const MAX_UNIT_PRICE = 100_000
 export const MAX_CART_LINES = 50
 
 export const emptyCart: CartState = { lines: [] }

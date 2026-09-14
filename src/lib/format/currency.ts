@@ -1,43 +1,68 @@
+import type { Locale } from '@/lib/i18n/config'
+
 /**
- * Money is handled in integer cents everywhere in this codebase. Floating point
- * dollars accumulate rounding error across cart lines, so amounts are only
- * converted to a decimal string at the moment they are displayed.
+ * Money is handled in whole Israeli shekels. The shop prices in round shekels —
+ * there are no agorot on its shelves — so there is no minor unit to carry and
+ * no rounding to accumulate.
+ *
+ * Israeli consumer prices are VAT-inclusive by law, so there is deliberately no
+ * "add tax at checkout" step: the shelf price is the price paid. VAT_RATE is
+ * exported only so the bag can state that VAT is already included.
  */
 
-export const TAX_RATE = 0.0825
+export const VAT_RATE = 0.18
 
-const formatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
+const LOCALE_TAGS: Record<Locale, string> = {
+  he: 'he-IL',
+  ar: 'ar-EG',
+  en: 'en-IL',
+}
 
-function assertValidCents(cents: number, label: string): void {
-  if (!Number.isFinite(cents)) {
-    throw new TypeError(`${label} must be a finite number, received ${cents}`)
+function assertValidAmount(amount: number): void {
+  if (!Number.isFinite(amount)) {
+    throw new TypeError(`price must be a finite number, received ${amount}`)
   }
-  if (!Number.isInteger(cents)) {
-    throw new TypeError(`${label} must be an integer number of cents, received ${cents}`)
+  if (!Number.isInteger(amount)) {
+    throw new TypeError(`price must be a whole number of shekels, received ${amount}`)
   }
-  if (cents < 0) {
-    throw new RangeError(`${label} must not be negative, received ${cents}`)
+  if (amount < 0) {
+    throw new RangeError(`price must not be negative, received ${amount}`)
   }
 }
 
-/** Renders integer cents as a localized currency string, e.g. 129900 -> "$1,299.00". */
-export function formatPrice(cents: number): string {
-  assertValidCents(cents, 'price')
-  return formatter.format(cents / 100)
+function buildFormatter(tag: string): Intl.NumberFormat {
+  return new Intl.NumberFormat(tag, {
+    style: 'currency',
+    currency: 'ILS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+    // Western digits in every locale: they match the shop's own signage and
+    // receipts, and Arabic-Indic digits here would read as a bug to the owner.
+    numberingSystem: 'latn',
+  })
 }
 
-/** Sales tax on a subtotal, rounded to the nearest whole cent. */
-export function calculateTax(subtotalCents: number): number {
-  assertValidCents(subtotalCents, 'subtotal')
-  return Math.round(subtotalCents * TAX_RATE)
+const formatters: Partial<Record<Locale, Intl.NumberFormat>> = {}
+const defaultFormatter = buildFormatter('en-IL')
+
+/** Formats using the shop's default presentation. */
+export function formatPrice(amount: number): string {
+  assertValidAmount(amount)
+  return defaultFormatter.format(amount)
 }
 
-/** Order total: subtotal plus tax. Shipping is free in this store. */
-export function calculateTotal(subtotalCents: number): number {
-  return subtotalCents + calculateTax(subtotalCents)
+/** Formats for a specific locale, so the currency sign sits correctly for RTL. */
+export function formatPriceFor(locale: Locale, amount: number): string {
+  assertValidAmount(amount)
+  formatters[locale] ??= buildFormatter(LOCALE_TAGS[locale])
+  return formatters[locale]!.format(amount)
+}
+
+/**
+ * The order total. Equal to the subtotal by design: prices include VAT and the
+ * shop does not charge for local delivery.
+ */
+export function orderTotal(subtotal: number): number {
+  assertValidAmount(subtotal)
+  return subtotal
 }

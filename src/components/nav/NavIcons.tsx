@@ -86,3 +86,13 @@ export function PlayIcon() {
     </svg>
   )
 }
+
+export function GlobeIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+      <circle cx="8.5" cy="8.5" r="6.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M2 8.5h13" stroke="currentColor" strokeWidth="1.3" />
+      <ellipse cx="8.5" cy="8.5" rx="3" ry="6.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  )
+}

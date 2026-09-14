@@ -2,53 +2,13 @@
 
 import Link from 'next/link'
 import { useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { categories } from '@/lib/catalog/products'
+import { categories } from '@/lib/catalog/categories'
+import { repairServices } from '@/lib/repairs/repairs'
 import { useTheme, type Theme } from '@/lib/theme/ThemeContext'
+import { useLocale } from '@/lib/i18n/LocaleContext'
+import { SHOP, mapsLink, telLink, whatsappLink } from '@/lib/shop'
 import { ChevronIcon } from '../nav/NavIcons'
 import styles from './GlobalFooter.module.css'
-
-interface FooterColumn {
-  title: string
-  links: readonly { label: string; href: string }[]
-}
-
-const STATIC_COLUMNS: readonly FooterColumn[] = [
-  {
-    title: 'Shop',
-    links: [
-      { label: 'Store home', href: '/store/all' },
-      { label: 'Trade in', href: '/support' },
-      { label: 'Financing', href: '/support' },
-      { label: 'Order status', href: '/support' },
-    ],
-  },
-  {
-    title: 'Support',
-    links: [
-      { label: 'Help Centre', href: '/support' },
-      { label: 'Delivery & pickup', href: '/support' },
-      { label: 'Returns', href: '/support' },
-      { label: 'Contact us', href: '/support' },
-    ],
-  },
-  {
-    title: 'Account',
-    links: [
-      { label: 'Your bag', href: '/cart' },
-      { label: 'Saved items', href: '/cart' },
-      { label: 'Preferences', href: '/support' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { label: 'About Axiom', href: '/support' },
-      { label: 'Newsroom', href: '/support' },
-      { label: 'Careers', href: '/support' },
-      { label: 'Sustainability', href: '/support' },
-    ],
-  },
-]
 
 const THEME_OPTIONS: readonly { value: Theme; label: string }[] = [
   { value: 'light', label: 'Light' },
@@ -58,13 +18,10 @@ const THEME_OPTIONS: readonly { value: Theme; label: string }[] = [
 
 export function GlobalFooter() {
   const { theme, setTheme } = useTheme()
+  const { locale, t } = useLocale()
   const [openColumn, setOpenColumn] = useState<string | null>(null)
 
-  /**
-   * Light/Dark/Auto is a single choice among three, so it is a radio group, not
-   * three independent toggles. That means roving tabindex plus arrow-key
-   * movement between options.
-   */
+  /** Light/Dark/Auto is one choice among three: a radio group, not three toggles. */
   function onThemeKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
     const keys = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp']
     if (!keys.includes(event.key)) return
@@ -75,20 +32,34 @@ export function GlobalFooter() {
     const next = (current + step + THEME_OPTIONS.length) % THEME_OPTIONS.length
 
     setTheme(THEME_OPTIONS[next].value)
-    event.currentTarget
-      .querySelectorAll<HTMLButtonElement>('[role="radio"]')
-      [next]?.focus()
+    event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus()
   }
 
-  const columns: readonly FooterColumn[] = [
+  const columns = [
     {
-      title: 'Products',
+      key: 'products',
+      title: t('nav_products'),
       links: categories.map((category) => ({
-        label: category.name,
-        href: `/store/${category.id}`,
+        label: t(category.labelKey),
+        href: `/${locale}/store/${category.id}`,
       })),
     },
-    ...STATIC_COLUMNS,
+    {
+      key: 'repairs',
+      title: t('nav_repairs'),
+      links: repairServices
+        .slice(0, 5)
+        .map((service) => ({ label: t(service.labelKey), href: `/${locale}/repairs` })),
+    },
+    {
+      key: 'shop',
+      title: t('nav_about'),
+      links: [
+        { label: t('ab_story_h'), href: `/${locale}/about` },
+        { label: t('ab_faq_h'), href: `/${locale}/about` },
+        { label: t('nav_bag'), href: `/${locale}/cart` },
+      ],
+    },
   ]
 
   return (
@@ -96,29 +67,23 @@ export function GlobalFooter() {
       <div className={styles.inner}>
         <div className={styles.columns}>
           {columns.map((column) => {
-            const isOpen = openColumn === column.title
+            const isOpen = openColumn === column.key
             return (
-              <div key={column.title} className={styles.column}>
+              <div key={column.key} className={styles.column}>
                 <h2 className={styles.columnTitle}>{column.title}</h2>
 
                 <button
                   type="button"
                   className={styles.accordionToggle}
                   aria-expanded={isOpen}
-                  aria-controls={`footer-${column.title}`}
-                  onClick={() => setOpenColumn(isOpen ? null : column.title)}
+                  aria-controls={`footer-${column.key}`}
+                  onClick={() => setOpenColumn(isOpen ? null : column.key)}
                 >
                   {column.title}
                   <ChevronIcon />
                 </button>
 
-                {/* Always rendered; CSS collapses it below 833px when closed,
-                    so there is no window read during render. */}
-                <div
-                  className={styles.panel}
-                  id={`footer-${column.title}`}
-                  data-open={isOpen}
-                >
+                <div className={styles.panel} id={`footer-${column.key}`} data-open={isOpen}>
                   {column.links.map((link) => (
                     <Link key={link.label} href={link.href} className={styles.columnLink}>
                       {link.label}
@@ -128,23 +93,79 @@ export function GlobalFooter() {
               </div>
             )
           })}
+
+          <div className={styles.column}>
+            <h2 className={styles.columnTitle}>{t('ab_contact_h')}</h2>
+
+            <button
+              type="button"
+              className={styles.accordionToggle}
+              aria-expanded={openColumn === 'contact'}
+              aria-controls="footer-contact"
+              onClick={() => setOpenColumn(openColumn === 'contact' ? null : 'contact')}
+            >
+              {t('ab_contact_h')}
+              <ChevronIcon />
+            </button>
+
+            <div
+              className={styles.panel}
+              id="footer-contact"
+              data-open={openColumn === 'contact'}
+            >
+              <a href={telLink()} className={styles.columnLink}>
+                {SHOP.phone}
+              </a>
+              <a
+                href={whatsappLink(t('wa_contact_head'))}
+                className={styles.columnLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('ab_wa_l')}
+              </a>
+              <a
+                href={mapsLink()}
+                className={styles.columnLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('ab_addr_v')}
+              </a>
+              <a
+                href={SHOP.instagram}
+                className={styles.columnLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {SHOP.instagramHandle}
+              </a>
+              <a
+                href={SHOP.facebook}
+                className={styles.columnLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Facebook
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className={styles.base}>
           <div className={styles.legal}>
-            <span>Copyright © {new Date().getFullYear()} Axiom Store. All rights reserved.</span>
-            <Link href="/support" className={styles.columnLink}>
-              Privacy Policy
-            </Link>
-            <Link href="/support" className={styles.columnLink}>
-              Terms of Use
+            <span>
+              © {new Date().getFullYear()} {SHOP.name} · {t('foot_est')}
+            </span>
+            <Link href={`/${locale}/about`} className={styles.columnLink}>
+              {t('foot_privacy')}
             </Link>
           </div>
 
           <div
             className={styles.themeToggle}
             role="radiogroup"
-            aria-label="Colour theme"
+            aria-label="Theme"
             onKeyDown={onThemeKeyDown}
           >
             {THEME_OPTIONS.map((option) => (
@@ -163,10 +184,7 @@ export function GlobalFooter() {
           </div>
         </div>
 
-        <p className={styles.disclaimer}>
-          Axiom is a fictional demonstration store. Product names, specifications and prices are
-          illustrative and nothing sold here is real.
-        </p>
+        <p className={styles.disclaimer}>{t('foot_tag')}</p>
       </div>
     </footer>
   )

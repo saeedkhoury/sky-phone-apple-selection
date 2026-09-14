@@ -2,16 +2,20 @@ import { describe, it, expect } from 'vitest'
 import {
   searchProducts,
   filterByCategory,
+  filterByBrand,
   sortProducts,
   getProductBySlug,
-  getFeaturedProducts,
+  getHighlights,
   getProductsByCategory,
+  priceForVariant,
 } from './query'
-import { products, categories } from './products'
+import { products } from './products'
+import { categories, brands } from './categories'
+import { LOCALES } from '@/lib/i18n/config'
 
-describe('catalog data integrity', () => {
-  it('ships a non-empty catalog', () => {
-    expect(products.length).toBeGreaterThan(0)
+describe('catalogue integrity', () => {
+  it('carries the shop’s full catalogue', () => {
+    expect(products).toHaveLength(27)
   })
 
   it('gives every product a unique slug', () => {
@@ -19,96 +23,172 @@ describe('catalog data integrity', () => {
     expect(new Set(slugs).size).toBe(slugs.length)
   })
 
+  it('gives every product a unique id', () => {
+    const ids = products.map((p) => p.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
   it('assigns every product to a known category', () => {
-    const ids = new Set(categories.map((c) => c.id))
-    expect(products.every((p) => ids.has(p.categoryId))).toBe(true)
+    const known = new Set(categories.map((c) => c.id))
+    expect(products.every((p) => known.has(p.categoryId as never))).toBe(true)
   })
 
-  it('gives every product at least one variant', () => {
-    expect(products.every((p) => p.variants.length > 0)).toBe(true)
+  it('assigns every product to a known brand', () => {
+    const known = new Set<string>(brands.map((b) => b.id))
+    const unknown = products.filter((p) => !known.has(p.brand)).map((p) => p.name)
+    expect(unknown).toEqual([])
   })
 
-  it('prices every variant as a positive integer number of cents', () => {
-    const prices = products.flatMap((p) => p.variants.map((v) => v.price))
-    expect(prices.every((n) => Number.isInteger(n) && n > 0)).toBe(true)
+  it('prices every product as a positive whole number of shekels', () => {
+    const bad = products.filter((p) => !Number.isInteger(p.price) || p.price <= 0)
+    expect(bad).toEqual([])
+  })
+
+  it('gives every product at least one image', () => {
+    expect(products.every((p) => p.images.length > 0)).toBe(true)
+  })
+
+  it('points every product at a local image path, never a remote URL', () => {
+    const remote = products.flatMap((p) => p.images).filter((src) => !src.startsWith('/img/'))
+    expect(remote).toEqual([])
+  })
+
+  it('describes every product in all three languages', () => {
+    const gaps = products.flatMap((p) =>
+      LOCALES.filter((locale) => !p.description[locale]?.trim()).map(
+        (locale) => `${p.name}/${locale}`,
+      ),
+    )
+    expect(gaps).toEqual([])
+  })
+
+  it('never offers a storage option that lowers the price below zero', () => {
+    const bad = products.filter((p) =>
+      (p.storage ?? []).some((s) => p.price + s.delta <= 0),
+    )
+    expect(bad).toEqual([])
+  })
+})
+
+describe('priceForVariant', () => {
+  it('returns the base price when no storage option is chosen', () => {
+    const product = products[0]
+    expect(priceForVariant(product)).toBe(product.price)
+  })
+
+  it('adds the storage delta', () => {
+    const product = products.find((p) => (p.storage?.length ?? 0) > 1)!
+    const upgrade = product.storage![1]
+    expect(priceForVariant(product, upgrade.label)).toBe(product.price + upgrade.delta)
+  })
+
+  it('falls back to the base price for an unknown storage label', () => {
+    const product = products[0]
+    expect(priceForVariant(product, 'no-such-option')).toBe(product.price)
   })
 })
 
 describe('searchProducts', () => {
-  it('returns every product for an empty query', () => {
-    expect(searchProducts(products, '')).toHaveLength(products.length)
+  it('returns everything for an empty query', () => {
+    expect(searchProducts(products, '', 'en')).toHaveLength(products.length)
   })
 
-  it('returns every product for a whitespace-only query', () => {
-    expect(searchProducts(products, '   ')).toHaveLength(products.length)
+  it('returns everything for a whitespace query', () => {
+    expect(searchProducts(products, '   ', 'en')).toHaveLength(products.length)
   })
 
-  it('matches on product name case-insensitively', () => {
+  it('matches a product name case-insensitively', () => {
+    const results = searchProducts(products, 'IPHONE', 'en')
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.every((p) => /iphone/i.test(p.name))).toBe(true)
+  })
+
+  it('matches a partial name', () => {
+    expect(searchProducts(products, 'galax', 'en').length).toBeGreaterThan(0)
+  })
+
+  it('matches on the brand', () => {
+    const results = searchProducts(products, 'samsung', 'en')
+    expect(results.some((p) => p.brand === 'samsung')).toBe(true)
+  })
+
+  it('searches the Hebrew description when the locale is Hebrew', () => {
     const target = products[0]
-    const results = searchProducts(products, target.name.toUpperCase())
-    expect(results.map((p) => p.slug)).toContain(target.slug)
+    const word = target.description.he.split(' ')[0]
+    expect(searchProducts(products, word, 'he').length).toBeGreaterThan(0)
   })
 
-  it('matches on a partial substring of the name', () => {
+  it('searches the Arabic description when the locale is Arabic', () => {
     const target = products[0]
-    const results = searchProducts(products, target.name.slice(0, 4))
-    expect(results.map((p) => p.slug)).toContain(target.slug)
+    const word = target.description.ar.split(' ')[0]
+    expect(searchProducts(products, word, 'ar').length).toBeGreaterThan(0)
   })
 
-  it('matches on the tagline', () => {
-    const target = products[0]
-    const word = target.tagline.split(' ')[0]
-    expect(searchProducts(products, word).length).toBeGreaterThan(0)
+  it('returns nothing when there is no match', () => {
+    expect(searchProducts(products, 'zzzzqqqq', 'en')).toEqual([])
   })
 
-  it('returns an empty array when nothing matches', () => {
-    expect(searchProducts(products, 'zzzzzzqqqq')).toEqual([])
-  })
-
-  it('ranks a name match above a description-only match', () => {
-    const target = products[0]
-    const results = searchProducts(products, target.name)
-    expect(results[0].slug).toBe(target.slug)
+  it('ranks an exact name match first', () => {
+    const results = searchProducts(products, 'Steam Deck', 'en')
+    expect(results[0].name).toBe('Steam Deck')
   })
 
   it('does not mutate the source array', () => {
     const before = [...products]
-    searchProducts(products, 'pro')
+    searchProducts(products, 'pro', 'en')
     expect(products).toEqual(before)
   })
 })
 
 describe('filterByCategory', () => {
-  it('returns only products in the requested category', () => {
-    const id = categories[0].id
-    expect(filterByCategory(products, id).every((p) => p.categoryId === id)).toBe(true)
+  it('returns only products in that category', () => {
+    const results = filterByCategory(products, 'phones')
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.every((p) => p.categoryId === 'phones')).toBe(true)
   })
 
-  it('returns every product when the category is "all"', () => {
+  it('returns everything for "all"', () => {
     expect(filterByCategory(products, 'all')).toHaveLength(products.length)
   })
 
-  it('returns an empty array for an unknown category', () => {
-    expect(filterByCategory(products, 'not-a-category')).toEqual([])
+  it('returns nothing for an unknown category', () => {
+    expect(filterByCategory(products, 'nope')).toEqual([])
+  })
+})
+
+describe('filterByBrand', () => {
+  it('returns only that brand', () => {
+    const results = filterByBrand(products, 'apple')
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.every((p) => p.brand === 'apple')).toBe(true)
+  })
+
+  it('returns everything for "all"', () => {
+    expect(filterByBrand(products, 'all')).toHaveLength(products.length)
   })
 })
 
 describe('sortProducts', () => {
   it('sorts by price ascending', () => {
-    const sorted = sortProducts(products, 'price-asc')
-    const prices = sorted.map((p) => p.variants[0].price)
+    const prices = sortProducts(products, 'price-asc').map((p) => p.price)
     expect(prices).toEqual([...prices].sort((a, b) => a - b))
   })
 
   it('sorts by price descending', () => {
-    const sorted = sortProducts(products, 'price-desc')
-    const prices = sorted.map((p) => p.variants[0].price)
+    const prices = sortProducts(products, 'price-desc').map((p) => p.price)
     expect(prices).toEqual([...prices].sort((a, b) => b - a))
   })
 
-  it('sorts by name alphabetically', () => {
+  it('sorts by name', () => {
     const names = sortProducts(products, 'name').map((p) => p.name)
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
+  })
+
+  it('puts badged products first when sorting by featured', () => {
+    const sorted = sortProducts(products, 'featured')
+    const lastBadged = sorted.map((p) => Boolean(p.badge)).lastIndexOf(true)
+    const firstPlain = sorted.findIndex((p) => !p.badge)
+    expect(lastBadged).toBeLessThan(firstPlain === -1 ? Infinity : firstPlain)
   })
 
   it('returns a new array rather than sorting in place', () => {
@@ -118,34 +198,26 @@ describe('sortProducts', () => {
   })
 })
 
-describe('getProductBySlug', () => {
-  it('finds a product by its slug', () => {
-    expect(getProductBySlug(products[0].slug)?.slug).toBe(products[0].slug)
+describe('lookups', () => {
+  it('finds a product by slug', () => {
+    expect(getProductBySlug('iphone-15-pro')?.name).toBe('iPhone 15 Pro')
   })
 
   it('returns undefined for an unknown slug', () => {
-    expect(getProductBySlug('no-such-product')).toBeUndefined()
-  })
-})
-
-describe('featured and category helpers', () => {
-  it('sorts featured products ahead of the rest', () => {
-    const sorted = sortProducts(products, 'featured')
-    const firstNonFeatured = sorted.findIndex((p) => !p.featured)
-    const lastFeatured = sorted.map((p) => !!p.featured).lastIndexOf(true)
-    expect(lastFeatured).toBeLessThan(firstNonFeatured === -1 ? Infinity : firstNonFeatured)
+    expect(getProductBySlug('nope')).toBeUndefined()
   })
 
-  it('returns only products flagged as featured', () => {
-    expect(getFeaturedProducts().every((p) => p.featured)).toBe(true)
+  it('returns highlights for a brand', () => {
+    const highlights = getHighlights('apple', 4)
+    expect(highlights.length).toBeGreaterThan(0)
+    expect(highlights.every((p) => p.brand === 'apple')).toBe(true)
   })
 
-  it('returns at least one featured product for the home page', () => {
-    expect(getFeaturedProducts().length).toBeGreaterThan(0)
+  it('caps highlights at the requested count', () => {
+    expect(getHighlights('apple', 2)).toHaveLength(2)
   })
 
-  it('looks up products by category from the full catalog', () => {
-    const id = categories[0].id
-    expect(getProductsByCategory(id).every((p) => p.categoryId === id)).toBe(true)
+  it('looks up a category from the full catalogue', () => {
+    expect(getProductsByCategory('gaming').every((p) => p.categoryId === 'gaming')).toBe(true)
   })
 })

@@ -14,7 +14,7 @@
 
 .columns {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-6);
   padding-bottom: var(--space-6);
   border-bottom: 1px solid var(--separator);

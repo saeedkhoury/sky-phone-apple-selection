@@ -1,0 +1,118 @@
+.categoryTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--separator);
+  background: linear-gradient(180deg, var(--tile-gradient-start), var(--tile-gradient-end));
+  color: var(--text-primary);
+  transition:
+    transform var(--duration-medium) var(--ease-standard),
+    border-color var(--duration-medium) var(--ease-standard);
+}
+
+.categoryTile:hover {
+  transform: translateY(-4px);
+  border-color: var(--gray-quaternary);
+  text-decoration: none;
+}
+
+.categoryArt {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-control);
+  background: var(--photo-ground);
+  padding: var(--space-4);
+}
+
+.categoryPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform var(--duration-medium) var(--ease-standard);
+}
+
+.categoryTile:hover .categoryPhoto {
+  transform: scale(1.05);
+}
+
+.categoryName {
+  font-size: var(--fs-17);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* ---- Trust band ---- */
+
+.trust {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.trustItem {
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--separator);
+  background-color: var(--bg-main);
+}
+
+.trustNumber {
+  display: block;
+  font-size: var(--fs-40);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+}
+
+.trustLabel {
+  display: block;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 734px) {
+  .trust {
+    grid-template-columns: 1fr;
+  }
+}
+
+.categoryTagline {
+  font-size: var(--fs-14);
+  color: rgba(245, 245, 247, 0.72);
+  margin-top: 4px;
+  /* Two lines max, so titles align across tiles of differing copy length. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(2 * 1.45em);
+}
+
+.banner {
+  background-color: var(--bg-main);
+  border-radius: var(--radius-card);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+}
+
+.bannerTitle {
+  font-size: var(--fs-40);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  margin-bottom: var(--space-3);
+}
+
+.bannerCopy {
+  font-size: var(--fs-19);
+  color: var(--text-secondary);
+  max-width: 52ch;
+  margin: 0 auto var(--space-5);
+}

@@ -14,6 +14,9 @@ html {
 
 body {
   margin: 0;
+  /* Hebrew and Arabic need a stack that actually has those glyphs; the Latin
+     faces come first so English still renders in the same system sans. */
+  font-synthesis-weight: none;
   background-color: var(--bg-page);
   color: var(--text-primary);
   font-family: var(--font-stack);
@@ -88,13 +91,13 @@ ul {
 /* Hidden until focused, then pinned top-left so a keyboard user can see it. */
 .skip-link {
   position: absolute;
-  left: -9999px;
+  inset-inline-start: -9999px;
   top: 0;
   z-index: 1000;
 }
 
 .skip-link:focus {
-  left: var(--space-3);
+  inset-inline-start: var(--space-3);
   top: var(--space-3);
   padding: var(--space-2) var(--space-4);
   background-color: var(--bg-elevated);

@@ -1,36 +1,30 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { products } from '@/lib/catalog/products'
 import { searchProducts } from '@/lib/catalog/query'
-import { ProductArt } from '@/components/product/ProductArt'
-import { formatPrice } from '@/lib/format/currency'
+import { formatPriceFor } from '@/lib/format/currency'
+import { useLocale } from '@/lib/i18n/LocaleContext'
 import { CloseIcon, SearchIcon } from './NavIcons'
 import styles from './SearchOverlay.module.css'
 
 const MAX_RESULTS = 8
-
-interface SearchOverlayProps {
-  onClose: () => void
-}
-
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-export function SearchOverlay({ onClose }: SearchOverlayProps) {
+export function SearchOverlay({ onClose }: { onClose: () => void }) {
+  const { locale, t } = useLocale()
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  // The parent unmounts this component on close, so state resets by itself and
-  // we only need to move focus into the field on open.
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
 
-  // aria-modal alone does not stop Tab reaching the page behind the dialog,
-  // so the cycle is implemented here.
+  // aria-modal alone does not stop Tab reaching the page behind the dialog.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -46,12 +40,11 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
 
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
-      const active = document.activeElement
 
-      if (event.shiftKey && active === first) {
+      if (event.shiftKey && document.activeElement === first) {
         event.preventDefault()
         last.focus()
-      } else if (!event.shiftKey && active === last) {
+      } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault()
         first.focus()
       }
@@ -61,7 +54,6 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
-  // Lock background scroll while the takeover is up.
   useEffect(() => {
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -71,8 +63,8 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
   }, [])
 
   const results = useMemo(
-    () => searchProducts(products, query).slice(0, MAX_RESULTS),
-    [query],
+    () => searchProducts(products, query, locale).slice(0, MAX_RESULTS),
+    [query, locale],
   )
 
   const isSearching = query.trim().length > 0
@@ -83,7 +75,7 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
       className={styles.overlay}
       role="dialog"
       aria-modal="true"
-      aria-label="Search"
+      aria-label={t('search_ph')}
     >
       <div className={styles.bar}>
         <div className={styles.inputWrap}>
@@ -92,48 +84,50 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
             ref={inputRef}
             className={styles.input}
             type="search"
-            placeholder="Search the store"
+            placeholder={t('search_ph')}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Search products"
+            aria-label={t('search_ph')}
           />
         </div>
-        <button type="button" className={styles.close} onClick={onClose} aria-label="Close search">
+        <button
+          type="button"
+          className={styles.close}
+          onClick={onClose}
+          aria-label={t('modal_close')}
+        >
           <CloseIcon />
         </button>
       </div>
 
       <div className={styles.results}>
-        <h2 className={styles.heading}>
-          {isSearching ? `${results.length} result${results.length === 1 ? '' : 's'}` : 'Popular'}
-        </h2>
-
         {isSearching && results.length === 0 ? (
-          <p className={styles.empty}>
-            No products match “{query.trim()}”. Try a different search.
-          </p>
+          <>
+            <h2 className={styles.heading}>{t('search_empty_h')}</h2>
+            <p className={styles.empty}>{t('search_empty_p')}</p>
+          </>
         ) : (
           <ul>
             {results.map((product) => (
               <li key={product.id}>
                 <Link
-                  href={`/product/${product.slug}`}
+                  href={`/${locale}/product/${product.slug}`}
                   className={styles.result}
                   onClick={onClose}
                 >
-                  <ProductArt
-                    categoryId={product.categoryId}
-                    swatch={product.variants[0].swatch}
+                  <Image
+                    src={product.image}
+                    alt=""
+                    width={48}
+                    height={48}
                     className={styles.thumb}
                   />
                   <span>
                     <span className={styles.resultName}>{product.name}</span>
-                    <span className={styles.resultMeta}>
-                      {' '}
-                      · From {formatPrice(product.variants[0].price)}
-                    </span>
                     <br />
-                    <span className={styles.resultMeta}>{product.tagline}</span>
+                    <span className={styles.resultMeta}>
+                      {formatPriceFor(locale, product.price)}
+                    </span>
                   </span>
                 </Link>
               </li>

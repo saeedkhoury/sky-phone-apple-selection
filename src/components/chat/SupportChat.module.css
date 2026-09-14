@@ -1,0 +1,242 @@
+.launcher {
+  position: fixed;
+  bottom: var(--space-5);
+  inset-inline-end: var(--space-5);
+  z-index: 150;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--separator);
+  background-color: var(--fill-blue);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.launcher:hover {
+  transform: translateY(-2px);
+}
+
+.panel {
+  position: fixed;
+  bottom: calc(var(--space-5) + 60px);
+  inset-inline-end: var(--space-5);
+  z-index: 150;
+  width: min(370px, calc(100vw - var(--space-6)));
+  max-height: min(560px, calc(100vh - 140px));
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-card);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: chat-in var(--duration-medium) var(--ease-standard);
+}
+
+@keyframes chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--separator);
+}
+
+.title {
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.sub {
+  font-size: var(--fs-12);
+  color: var(--fill-green);
+}
+
+.close {
+  appearance: none;
+  background: none;
+  border: 0;
+  color: var(--text-secondary);
+  padding: var(--space-1);
+}
+
+.close:hover {
+  color: var(--text-primary);
+}
+
+.log {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.message[data-from='user'] {
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.message[data-from='bot'] {
+  align-self: flex-start;
+  max-width: 92%;
+}
+
+.bubble {
+  font-size: var(--fs-14);
+  line-height: 1.45;
+  padding: 9px 13px;
+  border-radius: 16px;
+  white-space: pre-line;
+}
+
+.message[data-from='user'] .bubble {
+  background-color: var(--fill-blue);
+  color: #fff;
+  border-end-end-radius: 5px;
+}
+
+.message[data-from='bot'] .bubble {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-end-start-radius: 5px;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-2);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--separator);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: var(--fs-12);
+}
+
+.card:hover {
+  border-color: var(--fill-blue);
+  text-decoration: none;
+}
+
+.cardName {
+  font-weight: 600;
+}
+
+.cardPrice {
+  color: var(--text-secondary);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+.chip {
+  appearance: none;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--separator);
+  background: none;
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+}
+
+.chip:hover {
+  color: var(--text-primary);
+  border-color: var(--gray-quaternary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+.action {
+  font-size: var(--fs-12);
+}
+
+.composer {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--separator);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--separator);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--fs-14);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--fill-blue);
+}
+
+.send {
+  appearance: none;
+  padding: 8px 15px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  background-color: var(--fill-blue);
+  color: #fff;
+  font-size: var(--fs-12);
+}
+
+.send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.footnote {
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  text-align: center;
+  padding-bottom: var(--space-3);
+}
+
+@media (max-width: 734px) {
+  .panel {
+    inset-inline: var(--space-3);
+    width: auto;
+  }
+
+  .launcher {
+    bottom: var(--space-4);
+    inset-inline-end: var(--space-4);
+  }
+}

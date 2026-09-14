@@ -106,6 +106,9 @@
   height: 48px;
   border-radius: 10px;
   flex-shrink: 0;
+  object-fit: contain;
+  background: var(--photo-ground);
+  padding: 4px;
 }
 
 .resultName {

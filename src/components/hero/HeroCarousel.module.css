@@ -15,6 +15,40 @@
   animation: slide-in var(--duration-slow) var(--ease-standard);
 }
 
+/* Cut-out product art needs its own ground, the way apple.com/il stages a hero.
+   Light for a product shot, dark for the service slide. */
+.slide[data-ground='light'] .art {
+  background: radial-gradient(65% 60% at 50% 45%, #ffffff, #e9e9ee);
+  border-radius: var(--radius-card);
+}
+
+.slide[data-ground='dark'] .art {
+  background: radial-gradient(65% 60% at 50% 45%, #202024, #0a0a0c);
+  border-radius: var(--radius-card);
+}
+
+.copy {
+  min-width: 0;
+}
+
+.note {
+  font-size: var(--fs-17);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.price {
+  font-size: var(--fs-19);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.artImage {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+}
+
 @keyframes slide-in {
   from {
     opacity: 0;
@@ -61,6 +95,7 @@
   aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
+  padding: var(--space-4);
 }
 
 .artShape {

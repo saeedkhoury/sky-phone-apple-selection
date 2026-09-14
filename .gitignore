@@ -44,3 +44,8 @@ next-env.d.ts
 /coverage
 /test-results
 /playwright-report
+
+# Large binary assets copied from the Sky Phone site. They live in public/ and
+# are required to run, but do not belong in this demo repo's history.
+/public/img/
+/public/video/

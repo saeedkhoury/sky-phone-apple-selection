@@ -1,31 +1,31 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { categories } from '@/lib/catalog/products'
+import { categories } from '@/lib/catalog/categories'
 import { getProductsByCategory } from '@/lib/catalog/query'
 import { useCart } from '@/lib/cart/CartContext'
+import { useLocale } from '@/lib/i18n/LocaleContext'
+import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config'
+import { SHOP } from '@/lib/shop'
 import { SearchOverlay } from './SearchOverlay'
-import { CartIcon, MenuIcon, SearchIcon, CloseIcon } from './NavIcons'
+import { CartIcon, MenuIcon, SearchIcon, CloseIcon, GlobeIcon } from './NavIcons'
 import styles from './GlobalNav.module.css'
 
-const SUPPORT_LINKS = [
-  { href: '/support', label: 'Help Centre', hint: 'Guides and answers' },
-  { href: '/support', label: 'Delivery', hint: 'Tracking and returns' },
-  { href: '/support', label: 'Contact', hint: 'Talk to a specialist' },
-]
-
 export function GlobalNav() {
+  const { locale, t } = useLocale()
+  const pathname = usePathname()
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const { itemCount, isHydrated } = useCart()
   const headerRef = useRef<HTMLElement>(null)
   const searchTriggerRef = useRef<HTMLButtonElement>(null)
+  const { itemCount, isHydrated } = useCart()
 
   const close = useCallback(() => setOpenMenu(null), [])
 
-  // Escape closes the flyout, matching the source site's behaviour.
   useEffect(() => {
     if (!openMenu) return
     function onKeyDown(event: KeyboardEvent) {
@@ -35,7 +35,6 @@ export function GlobalNav() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [openMenu, close])
 
-  // Clicking or tabbing outside the header dismisses the flyout.
   useEffect(() => {
     if (!openMenu) return
     function onFocusOut(event: FocusEvent) {
@@ -47,12 +46,26 @@ export function GlobalNav() {
 
   const toggle = (menu: string) => setOpenMenu((current) => (current === menu ? null : menu))
 
+  /** Same page, different language — keeps the visitor where they were. */
+  function pathInLocale(next: string): string {
+    const rest = pathname.replace(new RegExp(`^/(${LOCALES.join('|')})`), '')
+    return `/${next}${rest || ''}`
+  }
+
   return (
     <>
       <header ref={headerRef} className={styles.header} data-open={openMenu !== null}>
-        <nav className={styles.bar} aria-label="Primary">
-          <Link href="/" className={styles.brand}>
-            Axiom <span className={styles.brandMark}>Store</span>
+        <nav className={styles.bar} aria-label={t('nav_products')}>
+          <Link href={`/${locale}`} className={styles.brand}>
+            <Image
+              src="/logo.png"
+              alt={SHOP.name}
+              width={30}
+              height={30}
+              className={styles.brandMark}
+              priority
+            />
+            <span className={styles.brandName}>{SHOP.name}</span>
           </Link>
 
           <ul className={styles.list}>
@@ -65,20 +78,19 @@ export function GlobalNav() {
                   aria-controls={`flyout-${category.id}`}
                   onClick={() => toggle(category.id)}
                 >
-                  {category.name}
+                  {t(category.labelKey)}
                 </button>
               </li>
             ))}
             <li>
-              <button
-                type="button"
-                className={styles.trigger}
-                aria-expanded={openMenu === 'support'}
-                aria-controls="flyout-support"
-                onClick={() => toggle('support')}
-              >
-                Support
-              </button>
+              <Link href={`/${locale}/repairs`} className={styles.navLink}>
+                {t('nav_repairs')}
+              </Link>
+            </li>
+            <li>
+              <Link href={`/${locale}/about`} className={styles.navLink}>
+                {t('nav_about')}
+              </Link>
             </li>
           </ul>
 
@@ -86,7 +98,7 @@ export function GlobalNav() {
             <button
               type="button"
               className={styles.menuButton}
-              aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
+              aria-label={t('filter_btn')}
               aria-expanded={isMobileOpen}
               aria-controls="mobile-menu"
               onClick={() => {
@@ -101,7 +113,7 @@ export function GlobalNav() {
               ref={searchTriggerRef}
               type="button"
               className={styles.iconButton}
-              aria-label="Search the store"
+              aria-label={t('search_ph')}
               onClick={() => {
                 close()
                 setIsMobileOpen(false)
@@ -111,7 +123,41 @@ export function GlobalNav() {
               <SearchIcon />
             </button>
 
-            <Link href="/cart" className={styles.iconButton} aria-label={cartLabel(itemCount)}>
+            <div className={styles.langWrap}>
+              <button
+                type="button"
+                className={styles.iconButton}
+                aria-expanded={openMenu === 'lang'}
+                aria-controls="lang-menu"
+                aria-label={t('trust_lang_l')}
+                onClick={() => toggle('lang')}
+              >
+                <GlobeIcon />
+              </button>
+              {openMenu === 'lang' && (
+                <ul className={styles.langMenu} id="lang-menu">
+                  {LOCALES.map((option) => (
+                    <li key={option}>
+                      <Link
+                        href={pathInLocale(option)}
+                        className={styles.langOption}
+                        lang={option}
+                        aria-current={option === locale}
+                        onClick={close}
+                      >
+                        {LOCALE_NAMES[option]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <Link
+              href={`/${locale}/cart`}
+              className={styles.iconButton}
+              aria-label={`${t('nav_bag')}${isHydrated && itemCount > 0 ? ` (${itemCount})` : ''}`}
+            >
               <CartIcon />
               {isHydrated && itemCount > 0 && (
                 <span className={styles.badge} aria-hidden="true">
@@ -122,59 +168,44 @@ export function GlobalNav() {
           </div>
         </nav>
 
-        {openMenu !== null && (
-          <div
-            className={styles.flyout}
-            id={`flyout-${openMenu}`}
-            onMouseLeave={close}
-          >
+        {openMenu !== null && openMenu !== 'lang' && (
+          <div className={styles.flyout} id={`flyout-${openMenu}`} onMouseLeave={close}>
             <div className={styles.flyoutInner}>
-              {openMenu === 'support' ? (
-                <div>
-                  <h2 className={styles.flyoutHeading}>Support</h2>
-                  {SUPPORT_LINKS.map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      className={styles.flyoutLink}
-                      onClick={close}
-                    >
-                      {link.label}
-                      <small>{link.hint}</small>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <FlyoutCategory categoryId={openMenu} onNavigate={close} />
-              )}
+              <FlyoutCategory categoryId={openMenu} onNavigate={close} />
             </div>
           </div>
         )}
+
         <div className={styles.mobilePanel} id="mobile-menu" data-open={isMobileOpen}>
           {categories.map((category) => (
             <Link
               key={category.id}
-              href={`/store/${category.id}`}
+              href={`/${locale}/store/${category.id}`}
               className={styles.mobileLink}
               onClick={() => setIsMobileOpen(false)}
             >
-              {category.name}
+              {t(category.labelKey)}
             </Link>
           ))}
           <Link
-            href="/support"
+            href={`/${locale}/repairs`}
             className={styles.mobileLink}
             onClick={() => setIsMobileOpen(false)}
           >
-            Support
+            {t('nav_repairs')}
+          </Link>
+          <Link
+            href={`/${locale}/about`}
+            className={styles.mobileLink}
+            onClick={() => setIsMobileOpen(false)}
+          >
+            {t('nav_about')}
           </Link>
         </div>
       </header>
 
-      {/* Pointer-only affordance. Keyboard users close the flyout with Escape
-          or by tabbing out, so the scrim stays out of the tab order rather than
-          presenting a viewport-sized focus target. */}
-      {openMenu !== null && (
+      {/* Pointer-only affordance; Escape and focus-out cover the keyboard. */}
+      {openMenu !== null && openMenu !== 'lang' && (
         <button
           type="button"
           className={styles.scrim}
@@ -188,19 +219,12 @@ export function GlobalNav() {
         <SearchOverlay
           onClose={() => {
             setIsSearchOpen(false)
-            // Return focus to the control that opened the dialog, or the
-            // keyboard user is dumped back at the top of the document.
             searchTriggerRef.current?.focus()
           }}
         />
       )}
     </>
   )
-}
-
-function cartLabel(count: number): string {
-  if (count === 0) return 'Shopping bag, empty'
-  return `Shopping bag, ${count} ${count === 1 ? 'item' : 'items'}`
 }
 
 function FlyoutCategory({
@@ -210,6 +234,7 @@ function FlyoutCategory({
   categoryId: string
   onNavigate: () => void
 }) {
+  const { locale, t } = useLocale()
   const category = categories.find((entry) => entry.id === categoryId)
   const items = getProductsByCategory(categoryId)
   if (!category) return null
@@ -217,18 +242,21 @@ function FlyoutCategory({
   return (
     <>
       <div>
-        <h2 className={styles.flyoutHeading}>Explore {category.name}</h2>
-        <Link href={`/store/${category.id}`} className={styles.flyoutLink} onClick={onNavigate}>
-          All {category.name}
-          <small>{category.tagline}</small>
+        <h2 className={styles.flyoutHeading}>{t(category.labelKey)}</h2>
+        <Link
+          href={`/${locale}/store/${category.id}`}
+          className={styles.flyoutLink}
+          onClick={onNavigate}
+        >
+          {t('filter_all')}
         </Link>
       </div>
       <div>
-        <h2 className={styles.flyoutHeading}>Shop</h2>
-        {items.map((product) => (
+        <h2 className={styles.flyoutHeading}>{t('nav_products')}</h2>
+        {items.slice(0, 8).map((product) => (
           <Link
             key={product.id}
-            href={`/product/${product.slug}`}
+            href={`/${locale}/product/${product.slug}`}
             className={styles.flyoutLink}
             onClick={onNavigate}
           >

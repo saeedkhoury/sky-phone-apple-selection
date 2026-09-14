@@ -1,29 +1,36 @@
+'use client'
+
 import Link from 'next/link'
-import { ProductArt } from '@/components/product/ProductArt'
-import { formatPrice } from '@/lib/format/currency'
+import Image from 'next/image'
+import { useLocale } from '@/lib/i18n/LocaleContext'
+import { formatPriceFor } from '@/lib/format/currency'
 import type { Product } from '@/lib/catalog/types'
 import styles from './ProductTile.module.css'
 
 export function ProductTile({ product }: { product: Product }) {
-  const base = product.variants[0]
+  const { locale, t } = useLocale()
 
   return (
-    <Link href={`/product/${product.slug}`} className={styles.tile}>
-      <div
-        className={styles.art}
-        style={{ background: `radial-gradient(120% 90% at 50% 0%, ${base.swatch}33, transparent)` }}
-      >
-        {product.badge && <span className={styles.badge}>{product.badge}</span>}
-        <ProductArt
-          categoryId={product.categoryId}
-          swatch={base.swatch}
-          className={styles.artShape}
+    <Link href={`/${locale}/product/${product.slug}`} className={styles.tile}>
+      <div className={styles.art}>
+        {product.badge && (
+          <span className={styles.badge} data-badge={product.badge}>
+            {t(product.badge === 'new' ? 'new' : 'instock_badge')}
+          </span>
+        )}
+        <Image
+          src={product.image}
+          alt={product.name}
+          width={320}
+          height={320}
+          className={styles.photo}
+          sizes="(max-width: 734px) 90vw, (max-width: 1068px) 45vw, 320px"
         />
       </div>
       <div className={styles.body}>
         <h3 className={styles.name}>{product.name}</h3>
-        <p className={styles.tagline}>{product.tagline}</p>
-        <p className={styles.price}>From {formatPrice(base.price)}</p>
+        <p className={styles.tagline}>{product.description[locale]}</p>
+        <p className={styles.price}>{formatPriceFor(locale, product.price)}</p>
       </div>
     </Link>
   )

@@ -1,28 +1,42 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
-import { ProductArt } from './ProductArt'
 import { useCart } from '@/lib/cart/CartContext'
-import { formatPrice } from '@/lib/format/currency'
+import { useLocale } from '@/lib/i18n/LocaleContext'
+import { formatPriceFor } from '@/lib/format/currency'
+import { priceForVariant } from '@/lib/catalog/query'
 import type { Product } from '@/lib/catalog/types'
 import styles from './ProductDetail.module.css'
 
 export function ProductDetail({ product }: { product: Product }) {
-  const [variantId, setVariantId] = useState(product.variants[0].id)
-  const [justAdded, setJustAdded] = useState(false)
+  const { locale, t } = useLocale()
   const { addItem } = useCart()
 
-  const selected = product.variants.find((v) => v.id === variantId) ?? product.variants[0]
+  const [colourName, setColourName] = useState(product.colors?.[0]?.name)
+  const [storageLabel, setStorageLabel] = useState(product.storage?.[0]?.label)
+  const [imageIndex, setImageIndex] = useState(0)
+  const [justAdded, setJustAdded] = useState(false)
+
+  const colour = product.colors?.find((entry) => entry.name === colourName)
+  // A colour with its own photography leads the gallery, followed by the
+  // product's other angles — picking a colour should not lose the extra shots.
+  const gallery = colour?.images?.length
+    ? [...new Set([...colour.images, ...product.images])]
+    : product.images
+  const activeImage = gallery[Math.min(imageIndex, gallery.length - 1)]
+  const price = priceForVariant(product, storageLabel)
+  const variantName = [colourName, storageLabel].filter(Boolean).join(' · ')
 
   function handleAdd() {
     addItem(
       {
         productId: product.id,
-        variantId: selected.id,
+        variantId: variantName || 'default',
         name: product.name,
-        variantName: selected.name,
-        unitPrice: selected.price,
+        variantName: variantName || product.name,
+        unitPrice: price,
         slug: product.slug,
       },
       1,
@@ -33,70 +47,107 @@ export function ProductDetail({ product }: { product: Product }) {
 
   return (
     <div className={`container ${styles.layout}`}>
-      <div
-        className={styles.gallery}
-        style={{
-          background: `radial-gradient(80% 70% at 50% 35%, ${selected.swatch}44, var(--bg-main))`,
-        }}
-      >
-        <ProductArt
-          categoryId={product.categoryId}
-          swatch={selected.swatch}
-          className={styles.galleryShape}
-        />
+      <div className={styles.gallery}>
+        <div className={styles.stage}>
+          <Image
+            src={activeImage}
+            alt={product.name}
+            width={640}
+            height={640}
+            className={styles.stageImage}
+            priority
+            sizes="(max-width: 833px) 90vw, 520px"
+          />
+        </div>
+
+        {gallery.length > 1 && (
+          <ul className={styles.thumbs}>
+            {gallery.map((src, index) => (
+              <li key={src}>
+                <button
+                  type="button"
+                  className={styles.thumb}
+                  aria-current={index === imageIndex}
+                  aria-label={`${product.name} ${index + 1}`}
+                  onClick={() => setImageIndex(index)}
+                >
+                  <Image src={src} alt="" width={72} height={72} className={styles.thumbImage} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div>
-        {product.badge && <p className={styles.badge}>{product.badge}</p>}
+        {product.badge && (
+          <p className={styles.badge}>{t(product.badge === 'new' ? 'new' : 'instock_badge')}</p>
+        )}
         <h1 className={styles.title}>{product.name}</h1>
-        <p className={styles.tagline}>{product.tagline}</p>
-        <p className={styles.description}>{product.description}</p>
+        <p className={styles.description}>{product.description[locale]}</p>
 
-        <fieldset className={styles.fieldset}>
-          <legend className={styles.legend}>Choose your configuration</legend>
-          <div className={styles.variants}>
-            {product.variants.map((variant) => (
-              <button
-                key={variant.id}
-                type="button"
-                className={styles.variant}
-                aria-pressed={variant.id === selected.id}
-                onClick={() => setVariantId(variant.id)}
-              >
-                <span
+        {product.colors && product.colors.length > 0 && (
+          <fieldset className={styles.fieldset}>
+            <legend className={styles.legend}>{t('pdp_color')}</legend>
+            <div className={styles.swatches}>
+              {product.colors.map((entry) => (
+                <button
+                  key={entry.name}
+                  type="button"
                   className={styles.swatch}
-                  style={{ backgroundColor: variant.swatch }}
-                  aria-hidden="true"
-                />
-                {variant.name}
-                <span className={styles.variantPrice}>{formatPrice(variant.price)}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
+                  aria-pressed={entry.name === colourName}
+                  aria-label={entry.name}
+                  title={entry.name}
+                  onClick={() => {
+                    setColourName(entry.name)
+                    setImageIndex(0)
+                  }}
+                >
+                  <span className={styles.swatchDot} style={{ backgroundColor: entry.hex }} />
+                </button>
+              ))}
+            </div>
+            <p className={styles.swatchName}>{colourName}</p>
+          </fieldset>
+        )}
+
+        {product.storage && product.storage.length > 0 && (
+          <fieldset className={styles.fieldset}>
+            <legend className={styles.legend}>
+              {product.variant2Label ?? t('pdp_storage')}
+            </legend>
+            <div className={styles.options}>
+              {product.storage.map((entry) => (
+                <button
+                  key={entry.label}
+                  type="button"
+                  className={styles.option}
+                  aria-pressed={entry.label === storageLabel}
+                  onClick={() => setStorageLabel(entry.label)}
+                >
+                  <span>{entry.label}</span>
+                  <span className={styles.optionPrice}>
+                    {formatPriceFor(locale, product.price + entry.delta)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
         <div className={styles.buyRow}>
-          <span className={styles.price}>{formatPrice(selected.price)}</span>
+          <span className={styles.price}>{formatPriceFor(locale, price)}</span>
           <Button onClick={handleAdd} large>
-            Add to Bag
+            {t('pdp_add')}
           </Button>
           {justAdded && (
             <span className={styles.added} role="status">
-              Added to your bag
+              {t('added')}
             </span>
           )}
         </div>
 
-        <p className={styles.note}>Free delivery · 30-day returns · 2-year warranty</p>
-
-        <section className={styles.specs} aria-label="Technical specifications">
-          {product.specs.map((spec) => (
-            <div key={spec.label} className={styles.specRow}>
-              <span className={styles.specLabel}>{spec.label}</span>
-              <span>{spec.value}</span>
-            </div>
-          ))}
-        </section>
+        <p className={styles.note}>{t('pdp_warranty_body')}</p>
       </div>
     </div>
   )

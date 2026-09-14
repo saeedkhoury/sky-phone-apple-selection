@@ -1,58 +1,69 @@
 import { describe, it, expect } from 'vitest'
-import { formatPrice, calculateTax, calculateTotal, TAX_RATE } from './currency'
+import { formatPrice, formatPriceFor, orderTotal, VAT_RATE } from './currency'
 
 describe('formatPrice', () => {
-  it('formats a whole-dollar amount with two decimals', () => {
-    expect(formatPrice(129900)).toBe('$1,299.00')
+  it('formats a price in shekels with a thousands separator', () => {
+    expect(formatPrice(4290)).toBe('₪4,290')
   })
 
-  it('formats an amount with cents', () => {
-    expect(formatPrice(4999)).toBe('$49.99')
+  it('formats a small price without a separator', () => {
+    expect(formatPrice(120)).toBe('₪120')
   })
 
-  it('formats zero as $0.00', () => {
-    expect(formatPrice(0)).toBe('$0.00')
+  it('formats zero', () => {
+    expect(formatPrice(0)).toBe('₪0')
   })
 
-  it('throws when given a negative amount', () => {
+  it('shows no agorot, because the shop prices in whole shekels', () => {
+    expect(formatPrice(4290)).not.toContain('.')
+  })
+
+  it('throws on a negative amount', () => {
     expect(() => formatPrice(-1)).toThrow(/negative/i)
   })
 
-  it('throws when given a non-integer number of cents', () => {
-    expect(() => formatPrice(10.5)).toThrow(/integer/i)
+  it('throws on a fractional amount', () => {
+    expect(() => formatPrice(10.5)).toThrow(/whole/i)
   })
 
-  it('throws when given a non-finite value', () => {
+  it('throws on a non-finite amount', () => {
     expect(() => formatPrice(Number.NaN)).toThrow(/finite/i)
   })
 })
 
-describe('calculateTax', () => {
-  it('applies the tax rate and rounds to the nearest cent', () => {
-    // 10000 cents * 0.0825 = 825 cents exactly
-    expect(calculateTax(10000)).toBe(Math.round(10000 * TAX_RATE))
+describe('formatPriceFor', () => {
+  it('puts the shekel sign before the number in English', () => {
+    expect(formatPriceFor('en', 4290)).toBe('₪4,290')
   })
 
-  it('returns zero tax on a zero subtotal', () => {
-    expect(calculateTax(0)).toBe(0)
+  it('formats Hebrew prices with western digits', () => {
+    const result = formatPriceFor('he', 4290)
+    expect(result).toContain('4')
+    expect(result).toContain('₪')
   })
 
-  it('never returns a fractional number of cents', () => {
-    expect(Number.isInteger(calculateTax(3333))).toBe(true)
+  it('formats Arabic prices with western digits, as the shop does', () => {
+    // Eastern Arabic numerals would not match the shop's own signage.
+    const result = formatPriceFor('ar', 4290)
+    expect(result).toMatch(/4[,٬]?290/)
   })
 
-  it('throws on a negative subtotal', () => {
-    expect(() => calculateTax(-100)).toThrow(/negative/i)
+  it('rejects invalid amounts in every locale', () => {
+    expect(() => formatPriceFor('he', -5)).toThrow()
   })
 })
 
-describe('calculateTotal', () => {
-  it('adds tax to the subtotal', () => {
-    const subtotal = 10000
-    expect(calculateTotal(subtotal)).toBe(subtotal + calculateTax(subtotal))
+describe('orderTotal', () => {
+  it('equals the subtotal, because shelf prices already include VAT', () => {
+    expect(orderTotal(4290)).toBe(4290)
   })
 
-  it('returns zero for an empty basket', () => {
-    expect(calculateTotal(0)).toBe(0)
+  it('is zero for an empty bag', () => {
+    expect(orderTotal(0)).toBe(0)
+  })
+
+  it('exposes the VAT rate for display purposes only', () => {
+    expect(VAT_RATE).toBeGreaterThan(0)
+    expect(VAT_RATE).toBeLessThan(1)
   })
 })

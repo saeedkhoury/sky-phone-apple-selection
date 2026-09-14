@@ -18,31 +18,40 @@
 }
 
 .art {
-  aspect-ratio: 4 / 3;
   position: relative;
+  aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
+  padding: var(--space-5);
+  background: var(--photo-ground);
 }
 
-/* Product artwork is generated from the variant swatch - no borrowed imagery. */
-.artShape {
-  width: 82%;
-  height: 82%;
+/* Product photography is shot on white; a light plate keeps it from floating
+   on the dark ground as a bright rectangle. */
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   transition: transform var(--duration-medium) var(--ease-standard);
 }
 
-.tile:hover .artShape {
+.tile:hover .photo {
   transform: scale(1.04);
 }
 
 .badge {
   position: absolute;
   top: var(--space-3);
-  left: var(--space-4);
+  inset-inline-start: var(--space-4);
+  z-index: 1;
   font-size: var(--fs-12);
   font-weight: 600;
-  color: var(--fill-orange);
   letter-spacing: var(--tracking-caption);
+  color: var(--fill-orange);
+}
+
+.badge[data-badge='hot'] {
+  color: var(--fill-red);
 }
 
 .body {
@@ -59,11 +68,17 @@
 .tagline {
   font-size: var(--fs-14);
   color: var(--text-secondary);
-  letter-spacing: var(--tracking-body);
   margin-bottom: var(--space-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(2 * 1.45em);
 }
 
 .price {
-  font-size: var(--fs-14);
+  font-size: var(--fs-17);
+  font-weight: 600;
   color: var(--text-primary);
 }

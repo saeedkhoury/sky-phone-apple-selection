@@ -15,16 +15,25 @@ import {
 import type { CartState } from './types'
 
 const item = {
-  productId: 'aero-15-pro',
-  variantId: 'space-black-1tb',
-  name: 'Aero 15 Pro',
-  variantName: 'Space Black · 1TB',
-  unitPrice: 249900,
-  slug: 'aero-15-pro',
+  productId: '1',
+  variantId: 'natural-titanium-128gb',
+  name: 'iPhone 15 Pro',
+  variantName: 'Natural Titanium · 128GB',
+  unitPrice: 4290,
+  slug: 'iphone-15-pro',
 }
 
-const otherVariant = { ...item, variantId: 'silver-512gb', variantName: 'Silver · 512GB' }
-const otherProduct = { ...item, productId: 'pulse-buds', variantId: 'white', slug: 'pulse-buds' }
+const otherVariant = {
+  ...item,
+  variantId: 'blue-titanium-256gb',
+  variantName: 'Blue Titanium · 256GB',
+}
+const otherProduct = {
+  ...item,
+  productId: '2',
+  variantId: 'titanium-black-256gb',
+  slug: 'galaxy-s24-ultra',
+}
 
 function addOnce(state: CartState = emptyCart, payload = item, quantity = 1): CartState {
   return cartReducer(state, { type: 'ADD_ITEM', item: payload, quantity })
@@ -35,7 +44,7 @@ describe('cartReducer — ADD_ITEM', () => {
     const next = addOnce()
     expect(next.lines).toHaveLength(1)
     expect(next.lines[0].quantity).toBe(1)
-    expect(next.lines[0].unitPrice).toBe(249900)
+    expect(next.lines[0].unitPrice).toBe(4290)
   })
 
   it('increments quantity when the same product and variant is added again', () => {
@@ -195,7 +204,7 @@ describe('cartReducer — CLEAR and HYDRATE', () => {
 describe('cart selectors', () => {
   it('sums line totals into a subtotal', () => {
     const state = addOnce(addOnce(emptyCart, item, 2), otherProduct, 1)
-    expect(selectSubtotal(state)).toBe(249900 * 2 + 249900)
+    expect(selectSubtotal(state)).toBe(4290 * 2 + 4290)
   })
 
   it('returns a zero subtotal for an empty cart', () => {
