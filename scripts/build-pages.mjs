@@ -23,7 +23,8 @@ if (result.status !== 0) process.exit(result.status ?? 1)
 await writeFile('out/index.html', `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Sky Phone — Apple Selection</title>
-<link rel="icon" href="${basePath}/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="${basePath}/favicon-32.png?v=sky-phone-1">
+<link rel="shortcut icon" href="${basePath}/favicon.ico?v=sky-phone-1">
 <style>body{margin:0;background:#111;color:#f5f5f7;font:18px system-ui;display:grid;min-height:100vh;place-items:center;text-align:center}h1{font:32px Georgia,serif;letter-spacing:.2em}nav{display:flex;gap:24px;justify-content:center}a{color:#2997ff}</style>
 </head><body><main><h1>SKY PHONE</h1><nav aria-label="Language"><a href="${basePath}/he/" lang="he">עברית</a><a href="${basePath}/ar/" lang="ar">العربية</a><a href="${basePath}/en/" lang="en">English</a></nav></main>
 <script>const supported=['he','ar','en'];const locale=(navigator.languages||[navigator.language]).map(tag=>tag.split('-')[0]).find(tag=>supported.includes(tag))||'he';location.replace('${basePath}/'+locale+'/'+location.search+location.hash);</script>

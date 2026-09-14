@@ -34,7 +34,14 @@ export async function generateMetadata({
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://skyphone.example'),
     title: `${SHOP.name} — ${translate(locale, 'nav_products')}`,
     description: translate(locale, 'ab_lead'),
-    icons: { icon: assetPath('/favicon.ico'), apple: assetPath('/apple-touch-icon.png') },
+    icons: {
+      icon: [
+        { url: assetPath('/favicon-32.png?v=sky-phone-1'), type: 'image/png', sizes: '32x32' },
+        { url: assetPath('/favicon.ico?v=sky-phone-1'), type: 'image/x-icon' },
+      ],
+      shortcut: assetPath('/favicon.ico?v=sky-phone-1'),
+      apple: assetPath('/apple-touch-icon.png?v=sky-phone-1'),
+    },
     robots: process.env.STATIC_EXPORT === 'true' ? { index: false, follow: false } : undefined,
     openGraph: {
       title: SHOP.name,
