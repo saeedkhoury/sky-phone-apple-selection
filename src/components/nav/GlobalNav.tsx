@@ -6,7 +6,7 @@ import { categories } from '@/lib/catalog/products'
 import { getProductsByCategory } from '@/lib/catalog/query'
 import { useCart } from '@/lib/cart/CartContext'
 import { SearchOverlay } from './SearchOverlay'
-import { CartIcon, SearchIcon } from './NavIcons'
+import { CartIcon, MenuIcon, SearchIcon, CloseIcon } from './NavIcons'
 import styles from './GlobalNav.module.css'
 
 const SUPPORT_LINKS = [
@@ -18,6 +18,7 @@ const SUPPORT_LINKS = [
 export function GlobalNav() {
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
   const { itemCount, isHydrated } = useCart()
   const headerRef = useRef<HTMLElement>(null)
 
@@ -83,10 +84,25 @@ export function GlobalNav() {
           <div className={styles.actions}>
             <button
               type="button"
+              className={styles.menuButton}
+              aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileOpen}
+              aria-controls="mobile-menu"
+              onClick={() => {
+                close()
+                setIsMobileOpen((open) => !open)
+              }}
+            >
+              {isMobileOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+
+            <button
+              type="button"
               className={styles.iconButton}
               aria-label="Search the store"
               onClick={() => {
                 close()
+                setIsMobileOpen(false)
                 setIsSearchOpen(true)
               }}
             >
@@ -132,6 +148,25 @@ export function GlobalNav() {
             </div>
           </div>
         )}
+        <div className={styles.mobilePanel} id="mobile-menu" data-open={isMobileOpen}>
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/store/${category.id}`}
+              className={styles.mobileLink}
+              onClick={() => setIsMobileOpen(false)}
+            >
+              {category.name}
+            </Link>
+          ))}
+          <Link
+            href="/support"
+            className={styles.mobileLink}
+            onClick={() => setIsMobileOpen(false)}
+          >
+            Support
+          </Link>
+        </div>
       </header>
 
       {openMenu !== null && (

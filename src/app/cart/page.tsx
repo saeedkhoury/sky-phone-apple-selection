@@ -1,10 +1,19 @@
 'use client'
 
 import { Button } from '@/components/ui/Button'
+import { ProductArt } from '@/components/product/ProductArt'
+import { getProductBySlug } from '@/lib/catalog/query'
 import { useCart } from '@/lib/cart/CartContext'
 import { MAX_LINE_QUANTITY } from '@/lib/cart/reducer'
 import { calculateTax, calculateTotal, formatPrice } from '@/lib/format/currency'
 import styles from './page.module.css'
+
+/** Cart lines store a price snapshot, not a colour, so look the swatch up. */
+function variantSwatch(slug: string, variantId: string): string {
+  const product = getProductBySlug(slug)
+  const variant = product?.variants.find((entry) => entry.id === variantId)
+  return variant?.swatch ?? '#3a3a3e'
+}
 
 export default function CartPage() {
   const { state, subtotal, setQuantity, removeItem, isHydrated } = useCart()
@@ -43,12 +52,10 @@ export default function CartPage() {
         <section aria-label="Bag items">
           {state.lines.map((line) => (
             <div key={`${line.productId}-${line.variantId}`} className={styles.line}>
-              <span
+              <ProductArt
+                categoryId={getProductBySlug(line.slug)?.categoryId ?? 'accessories'}
+                swatch={variantSwatch(line.slug, line.variantId)}
                 className={styles.thumb}
-                style={{
-                  background: `linear-gradient(150deg, var(--bg-secondary), var(--bg-elevated))`,
-                }}
-                aria-hidden="true"
               />
 
               <div>

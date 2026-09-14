@@ -56,3 +56,16 @@ export function ChevronIcon() {
     </svg>
   )
 }
+
+export function MenuIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+      <path
+        d="M2.5 5h12M2.5 12h12"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}

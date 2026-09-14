@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { ProductArt } from './ProductArt'
 import { useCart } from '@/lib/cart/CartContext'
 import { formatPrice } from '@/lib/format/currency'
 import type { Product } from '@/lib/catalog/types'
@@ -38,10 +39,10 @@ export function ProductDetail({ product }: { product: Product }) {
           background: `radial-gradient(80% 70% at 50% 35%, ${selected.swatch}44, var(--bg-main))`,
         }}
       >
-        <span
+        <ProductArt
+          categoryId={product.categoryId}
+          swatch={selected.swatch}
           className={styles.galleryShape}
-          style={{ background: `linear-gradient(155deg, ${selected.swatch}, ${selected.swatch}77)` }}
-          aria-hidden="true"
         />
       </div>
 

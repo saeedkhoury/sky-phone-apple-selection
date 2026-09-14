@@ -21,7 +21,7 @@ export default function HomePage() {
           title="Shop by category"
           subtitle="Five product lines, one system."
         />
-        <TileGrid columns={3}>
+        <TileGrid columns={5}>
           {categories.map((category) => (
             <Link
               key={category.id}

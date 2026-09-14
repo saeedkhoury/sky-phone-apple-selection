@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ProductArt } from '@/components/product/ProductArt'
 import { formatPrice } from '@/lib/format/currency'
 import type { Product } from '@/lib/catalog/types'
 import styles from './ProductTile.module.css'
@@ -13,10 +14,10 @@ export function ProductTile({ product }: { product: Product }) {
         style={{ background: `radial-gradient(120% 90% at 50% 0%, ${base.swatch}33, transparent)` }}
       >
         {product.badge && <span className={styles.badge}>{product.badge}</span>}
-        <span
+        <ProductArt
+          categoryId={product.categoryId}
+          swatch={base.swatch}
           className={styles.artShape}
-          style={{ background: `linear-gradient(155deg, ${base.swatch}, ${base.swatch}88)` }}
-          aria-hidden="true"
         />
       </div>
       <div className={styles.body}>

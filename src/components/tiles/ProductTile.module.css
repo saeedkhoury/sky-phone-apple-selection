@@ -26,12 +26,13 @@
 
 /* Product artwork is generated from the variant swatch - no borrowed imagery. */
 .artShape {
-  width: 58%;
-  height: 58%;
-  border-radius: 16px;
-  box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  width: 82%;
+  height: 82%;
+  transition: transform var(--duration-medium) var(--ease-standard);
+}
+
+.tile:hover .artShape {
+  transform: scale(1.04);
 }
 
 .badge {

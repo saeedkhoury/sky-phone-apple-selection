@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { products } from '@/lib/catalog/products'
 import { searchProducts } from '@/lib/catalog/query'
+import { ProductArt } from '@/components/product/ProductArt'
 import { formatPrice } from '@/lib/format/currency'
 import { CloseIcon, SearchIcon } from './NavIcons'
 import styles from './SearchOverlay.module.css'
@@ -86,12 +87,10 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
                   className={styles.result}
                   onClick={onClose}
                 >
-                  <span
+                  <ProductArt
+                    categoryId={product.categoryId}
+                    swatch={product.variants[0].swatch}
                     className={styles.thumb}
-                    style={{
-                      background: `linear-gradient(135deg, ${product.variants[0].swatch}, var(--bg-secondary))`,
-                    }}
-                    aria-hidden="true"
                   />
                   <span>
                     <span className={styles.resultName}>{product.name}</span>

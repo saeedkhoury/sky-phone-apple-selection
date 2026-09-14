@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { ProductArt } from '@/components/product/ProductArt'
 import { formatPrice } from '@/lib/format/currency'
 import type { Product } from '@/lib/catalog/types'
 import { Button } from '../ui/Button'
@@ -61,10 +62,10 @@ export function HeroCarousel({ slides }: { slides: readonly Product[] }) {
             background: `radial-gradient(70% 60% at 50% 40%, ${base.swatch}44, transparent)`,
           }}
         >
-          <span
+          <ProductArt
+            categoryId={product.categoryId}
+            swatch={base.swatch}
             className={styles.artShape}
-            style={{ background: `linear-gradient(155deg, ${base.swatch}, ${base.swatch}77)` }}
-            aria-hidden="true"
           />
         </div>
       </div>
