@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { useCart } from '@/lib/cart/CartContext'
@@ -50,7 +51,7 @@ export function ProductDetail({ product }: { product: Product }) {
       <div className={styles.gallery}>
         <div className={styles.stage}>
           <Image
-            src={activeImage}
+            src={assetPath(activeImage)}
             alt={product.name}
             width={640}
             height={640}
@@ -71,7 +72,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   aria-label={`${product.name} ${index + 1}`}
                   onClick={() => setImageIndex(index)}
                 >
-                  <Image src={src} alt="" width={72} height={72} className={styles.thumbImage} />
+                  <Image src={assetPath(src)} alt="" width={72} height={72} className={styles.thumbImage} />
                 </button>
               </li>
             ))}

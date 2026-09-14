@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { Button } from '@/components/ui/Button'
 import { useCart } from '@/lib/cart/CartContext'
 import { useLocale } from '@/lib/i18n/LocaleContext'
@@ -68,7 +69,7 @@ export default function CartPage() {
               <div key={`${line.productId}-${line.variantId}`} className={styles.line}>
                 {product && (
                   <Image
-                    src={product.image}
+                    src={assetPath(product.image)}
                     alt=""
                     width={88}
                     height={88}

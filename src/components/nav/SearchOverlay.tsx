@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { products } from '@/lib/catalog/products'
 import { searchProducts } from '@/lib/catalog/query'
@@ -116,7 +117,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                   onClick={onClose}
                 >
                   <Image
-                    src={product.image}
+                    src={assetPath(product.image)}
                     alt=""
                     width={48}
                     height={48}

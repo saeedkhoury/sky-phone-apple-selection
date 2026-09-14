@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { useLocale } from '@/lib/i18n/LocaleContext'
@@ -299,7 +300,7 @@ export function HeroCarousel({ slides }: { slides: readonly HeroSlide[] }) {
                       portrait assets, such as the PS5, fully visible rather than
                       letting their intrinsic height overflow the frame. */}
                   <Image
-                    src={entry.image}
+                    src={assetPath(entry.image)}
                     alt={entry.alt}
                     fill
                     sizes="(max-width: 833px) calc(100vw - 64px), 40vw"

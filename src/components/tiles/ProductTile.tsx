@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { useLocale } from '@/lib/i18n/LocaleContext'
 import { formatPriceFor } from '@/lib/format/currency'
 import type { Product } from '@/lib/catalog/types'
@@ -20,7 +21,7 @@ export function ProductTile({ product }: { product: Product }) {
         )}
         <div className={styles.media}>
           <Image
-            src={product.image}
+            src={assetPath(product.image)}
             alt={product.name}
             fill
             className={styles.photo}

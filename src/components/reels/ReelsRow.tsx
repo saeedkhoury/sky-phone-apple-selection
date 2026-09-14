@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { assetPath } from '@/lib/asset-path'
 import { translate, type Locale } from '@/lib/i18n/config'
 import { SHOP } from '@/lib/shop'
 import styles from './ReelsRow.module.css'
@@ -34,8 +35,8 @@ export function ReelsRow({ locale }: { locale: Locale }) {
           <li key={reel.src} className={styles.item}>
             <video
               className={styles.video}
-              src={reel.src}
-              poster={reel.poster}
+              src={assetPath(reel.src)}
+              poster={assetPath(reel.poster)}
               controls
               preload="none"
               playsInline

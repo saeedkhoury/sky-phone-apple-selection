@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { translate, type Locale } from '@/lib/i18n/config'
 import { SHOP } from '@/lib/shop'
 import styles from './BrandLoader.module.css'
@@ -14,7 +15,7 @@ export function BrandLoader({ locale }: { locale?: Locale }) {
         <div className={styles.markWrap}>
           <span className={styles.halo} aria-hidden="true" />
           <Image
-            src="/logo.png"
+            src={assetPath('/logo.png')}
             alt=""
             width={76}
             height={76}

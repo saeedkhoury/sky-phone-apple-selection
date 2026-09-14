@@ -1,7 +1,7 @@
 {
   "name": "sky-phone-apple-selection",
   "version": "0.1.0",
-  "description": "Private pre-launch storefront for Sky Phone — Apple Selection.",
+  "description": "Trilingual storefront preview for Sky Phone — Apple Selection.",
   "private": true,
   "license": "UNLICENSED",
   "engines": {
@@ -11,12 +11,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:pages": "node scripts/build-pages.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:pages": "playwright test --config playwright.pages.config.ts"
   },
   "dependencies": {
     "next": "16.3.5",

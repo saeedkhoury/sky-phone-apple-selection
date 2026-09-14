@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { HeroCarousel, type HeroSlide } from '@/components/hero/HeroCarousel'
 import { ProductTile } from '@/components/tiles/ProductTile'
 import { TileGrid } from '@/components/tiles/TileGrid'
@@ -116,7 +117,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             >
               <span className={styles.categoryArt}>
                 <Image
-                  src={CATEGORY_ART[category.id] ?? '/img/charger.webp'}
+                  src={assetPath(CATEGORY_ART[category.id] ?? '/img/charger.webp')}
                   alt=""
                   width={180}
                   height={180}

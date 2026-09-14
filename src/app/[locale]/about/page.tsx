@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { notFound } from 'next/navigation'
 import { LOCALES, isLocale, translate } from '@/lib/i18n/config'
 import { SHOP, mapsLink, telLink, whatsappLink } from '@/lib/shop'
@@ -40,7 +41,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
   return (
     <>
       <header className={`container ${styles.hero}`}>
-        <Image src="/logo.png" alt={SHOP.name} width={72} height={72} className={styles.logo} />
+        <Image src={assetPath('/logo.png')} alt={SHOP.name} width={72} height={72} className={styles.logo} />
         <h1 className={styles.title}>{t('ab_title')}</h1>
         <p className={styles.lead}>{t('ab_lead')}</p>
       </header>

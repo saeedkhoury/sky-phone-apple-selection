@@ -23,6 +23,7 @@ import type { NextConfig } from 'next'
  * server needs a websocket for HMR. Production gets neither.
  */
 const isDev = process.env.NODE_ENV === 'development'
+const isStaticExport = process.env.STATIC_EXPORT === 'true'
 
 const contentSecurityPolicy = [
   `default-src 'self'`,
@@ -54,6 +55,8 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  ...(isStaticExport ? { output: 'export' as const, trailingSlash: true } : {}),
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
   // This project is nested below another npm lockfile on the developer
   // machine. Pin Turbopack to this repository so local and CI builds resolve
   // this package-lock.json rather than walking into the parent workspace.
@@ -76,9 +79,12 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
 
-  async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }]
-  },
+  // GitHub Pages serves static files and cannot apply Next.js response headers.
+  ...(!isStaticExport && {
+    async headers() {
+      return [{ source: '/:path*', headers: securityHeaders }]
+    },
+  }),
 }
 
 export default nextConfig

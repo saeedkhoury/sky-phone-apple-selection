@@ -1,14 +1,29 @@
 # Sky Phone — Apple Selection
 
-Private, pre-launch source for Sky Phone's trilingual storefront. The project
+**[Open the Sky Phone website](https://saeedkhoury.github.io/sky-phone-apple-selection/en/)**
+
+Public preview and source for Sky Phone's trilingual storefront. The project
 supports Hebrew, Arabic, and English shopping journeys for phones, tablets,
 computers, gaming, accessories, repairs, and WhatsApp sales enquiries.
 
-> **Status:** production-preparation. This is not yet an owner-approved public
-> store or a payment/inventory system.
+> **Status:** public review preview, pending the store owner's commercial launch
+> approval. The bag creates WhatsApp enquiries; there is no payment/inventory backend.
 
 Repository: [saeedkhoury/sky-phone-apple-selection](https://github.com/saeedkhoury/sky-phone-apple-selection)
-(private until the owner approval gates are complete).
+
+The `github.io` link above opens the website. The `github.com` repository link
+opens the source code and this README.
+
+## Published website
+
+- [English](https://saeedkhoury.github.io/sky-phone-apple-selection/en/)
+- [עברית](https://saeedkhoury.github.io/sky-phone-apple-selection/he/)
+- [العربية](https://saeedkhoury.github.io/sky-phone-apple-selection/ar/)
+
+GitHub Pages publishes the built storefront after the **Publish storefront**
+workflow succeeds on `main`. Images, videos, search, brand filters, language
+navigation, and the browser-local bag are included. See the
+[hosting guide](docs/hosting.md) for deployment, checks, and the later domain handoff.
 
 ## What is included
 
@@ -48,6 +63,8 @@ npx playwright install chromium
 | `npm test` | Run unit and integration tests with Vitest. |
 | `npm run test:coverage` | Run the coverage gate for `src/lib`. |
 | `npm run build` | Produce and validate the production build. |
+| `npm run build:pages` | Export the complete website to `out/` for GitHub Pages. |
+| `npm run test:pages` | Test the actual static export and repository-prefixed URLs. |
 | `npm run start` | Serve a completed production build. |
 | `npm run test:e2e` | Run Playwright Chromium customer journeys. |
 
@@ -107,17 +124,18 @@ pre-launch fallback only and must not remain on a public deployment.
 - [Quality assurance guide](docs/testing/quality-assurance.md) describes the
   automated coverage and the release verification record.
 
-The GitHub repository remains private until the store owner has approved the
-asset rights, customer promises, domain, policy copy, and launch decision.
+The repository and review preview are public at the project owner's request.
+Store-owner approval of commercial facts, policies, asset rights, and the final
+business launch remains a separate milestone.
 
 ## Assets, ownership, and licensing
 
-This repository is private commercial source and is intentionally marked
+This repository is commercial source and is intentionally marked
 `UNLICENSED`. It contains the runtime images and videos needed for a complete
 project checkout and deploy preview. Those assets have mixed provenance (owner-supplied,
 manufacturer, Wikimedia, and synthetic/mockup material); repository access is
-not proof of a public-use licence. Keep a private asset register and obtain
-owner approval before public deployment or reuse.
+not proof of a public-use licence. Keep a private asset register and resolve
+asset approvals before the store's commercial launch or reuse elsewhere.
 
 ## Known pre-launch decisions
 
@@ -125,8 +143,8 @@ owner approval before public deployment or reuse.
   with the owner.
 - Replace or explicitly approve the low-resolution synthetic iPhone 17 Pro and
   iPhone 17 Pro Max imagery before public release.
-- Pick hosting, monitoring, analytics, legal/privacy copy, and the production
-  domain only after owner approval.
+- GitHub Pages hosts the public review preview. Confirm the commercial hosting,
+  monitoring, analytics, legal/privacy copy, and custom domain with the owner.
 - The Content Security Policy currently permits inline scripts to preserve
   static rendering in the Next.js App Router. Record acceptance at launch and
   reassess a nonce-based CSP if the project becomes dynamic.

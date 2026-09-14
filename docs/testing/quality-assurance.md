@@ -28,6 +28,9 @@ npm run test:e2e
 ```
 
 The GitHub workflow runs the same baseline checks on pushes and pull requests.
+The Pages deployment additionally runs `npm run build:pages` and
+`npm run test:pages` against the static export before publishing. See the
+[hosting guide](../hosting.md) for the public-URL verification command.
 For deployments, also complete the manual smoke tests in
 [Owner Approval & Launch Checklist](../owner-approval-and-launch.md).
 

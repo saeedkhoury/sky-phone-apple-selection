@@ -15,6 +15,7 @@ import {
 } from '@/lib/i18n/config'
 import { THEME_INIT_SCRIPT } from '@/lib/theme/themeStore'
 import { SHOP } from '@/lib/shop'
+import { assetPath } from '@/lib/asset-path'
 import '../globals.css'
 
 export function generateStaticParams() {
@@ -33,11 +34,12 @@ export async function generateMetadata({
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://skyphone.example'),
     title: `${SHOP.name} — ${translate(locale, 'nav_products')}`,
     description: translate(locale, 'ab_lead'),
-    icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
+    icons: { icon: assetPath('/favicon.ico'), apple: assetPath('/apple-touch-icon.png') },
+    robots: process.env.STATIC_EXPORT === 'true' ? { index: false, follow: false } : undefined,
     openGraph: {
       title: SHOP.name,
       description: translate(locale, 'ab_lead'),
-      images: ['/og-image.jpg'],
+      images: [assetPath('/og-image.jpg')],
     },
   }
 }

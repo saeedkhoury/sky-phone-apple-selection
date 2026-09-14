@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { translate, type Locale } from '@/lib/i18n/config'
 import { SHOP } from '@/lib/shop'
 import styles from './AppSplash.module.css'
@@ -15,7 +16,7 @@ export function AppSplash({ locale }: { locale: Locale }) {
         <div className={styles.markWrap}>
           <span className={styles.halo} />
           <Image
-            src="/logo.png"
+            src={assetPath('/logo.png')}
             alt=""
             width={80}
             height={80}
