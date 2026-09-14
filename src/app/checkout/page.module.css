@@ -1,0 +1,121 @@
+.wrap {
+  padding-block: var(--space-8) var(--space-10);
+}
+
+.title {
+  font-size: var(--fs-40);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  margin-bottom: var(--space-7);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.label {
+  display: block;
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: var(--tracking-caption);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--separator);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--fs-17);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.input:focus {
+  border-color: var(--fill-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.25);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--fill-red);
+}
+
+.error {
+  display: block;
+  font-size: var(--fs-12);
+  color: var(--fill-red);
+  margin-top: 5px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.summary {
+  background-color: var(--bg-main);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-14);
+  padding-block: var(--space-2);
+}
+
+.total {
+  font-size: var(--fs-21);
+  font-weight: 600;
+  border-top: 1px solid var(--separator);
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+}
+
+.notice {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-control);
+  background-color: var(--bg-main);
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+
+.confirmation {
+  text-align: center;
+  padding-block: var(--space-9);
+}
+
+.confirmTitle {
+  font-size: var(--fs-40);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  margin-bottom: var(--space-4);
+}
+
+.confirmCopy {
+  color: var(--text-secondary);
+  font-size: var(--fs-19);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 833px) {
+  .layout,
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

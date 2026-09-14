@@ -1,69 +1,68 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link'
+import { HeroCarousel } from '@/components/hero/HeroCarousel'
+import { ProductTile } from '@/components/tiles/ProductTile'
+import { TileGrid } from '@/components/tiles/TileGrid'
+import { SectionHeader } from '@/components/ui/SectionHeader'
+import { Button } from '@/components/ui/Button'
+import { categories, products } from '@/lib/catalog/products'
+import { getFeaturedProducts } from '@/lib/catalog/query'
+import styles from './page.module.css'
 
-export default function Home() {
+export default function HomePage() {
+  const featured = getFeaturedProducts()
+  const latest = products.slice(0, 6)
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <HeroCarousel slides={featured} />
+
+      <section className="container section">
+        <SectionHeader
+          title="Shop by category"
+          subtitle="Five product lines, one system."
         />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+        <TileGrid columns={3}>
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/store/${category.id}`}
+              className={styles.categoryTile}
+              style={{
+                background: `linear-gradient(160deg, ${category.gradient[0]}, ${category.gradient[1]})`,
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+              <h3 className={styles.categoryName}>{category.name}</h3>
+              <p className={styles.categoryTagline}>{category.tagline}</p>
+            </Link>
+          ))}
+        </TileGrid>
+      </section>
+
+      <section className="container section">
+        <SectionHeader
+          title="Latest releases"
+          subtitle="The newest hardware across the range."
+          action={{ href: '/store/all', label: 'View all products' }}
+        />
+        <TileGrid columns={3}>
+          {latest.map((product) => (
+            <ProductTile key={product.id} product={product} />
+          ))}
+        </TileGrid>
+      </section>
+
+      <section className="container section">
+        <div className={styles.banner}>
+          <h2 className={styles.bannerTitle}>Free delivery. Always.</h2>
+          <p className={styles.bannerCopy}>
+            Every order ships free, arrives in two days, and comes with a thirty-day return
+            window — no questions, no restocking fee.
           </p>
+          <Button href="/store/all" large>
+            Shop the full range
+          </Button>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </section>
+    </>
+  )
 }

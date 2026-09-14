@@ -1,0 +1,217 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--nav-bg);
+  backdrop-filter: var(--nav-backdrop);
+  -webkit-backdrop-filter: var(--nav-backdrop);
+  border-bottom: 1px solid var(--separator);
+  transition: background-color var(--duration-medium) var(--ease-standard);
+}
+
+.header[data-open='true'] {
+  background-color: var(--nav-bg-opened);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  height: var(--nav-height);
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--fs-19);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--nav-color-hover);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brandMark {
+  font-weight: 400;
+  font-size: var(--fs-17);
+  color: var(--text-secondary);
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex: 1;
+}
+
+.trigger,
+.navLink {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: var(--fs-14);
+  line-height: var(--nav-height);
+  color: var(--nav-color);
+  letter-spacing: var(--tracking-body);
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.trigger:hover,
+.navLink:hover {
+  color: var(--nav-color-hover);
+  text-decoration: none;
+}
+
+.trigger[aria-expanded='true'] {
+  color: var(--nav-color-hover);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
+.iconButton {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nav-color);
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.iconButton:hover {
+  color: var(--nav-color-hover);
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 4px;
+  border-radius: 8px;
+  background-color: var(--fill-blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* ---- Flyout ---- */
+
+.flyout {
+  overflow: hidden;
+  background-color: var(--nav-bg-opened);
+  border-top: 1px solid var(--separator);
+  animation: flyout-in var(--duration-medium) var(--ease-standard);
+}
+
+@keyframes flyout-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.flyoutInner {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5) var(--space-8);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-6);
+}
+
+.flyoutHeading {
+  font-size: var(--fs-12);
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-caption);
+  margin-bottom: var(--space-3);
+}
+
+.flyoutLink {
+  display: block;
+  font-size: var(--fs-24);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--nav-color-secondary);
+  padding-block: 4px;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.flyoutLink:hover {
+  color: var(--nav-color-hover);
+  text-decoration: none;
+}
+
+.flyoutLink small {
+  display: block;
+  font-size: var(--fs-12);
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-body);
+}
+
+.scrim {
+  position: fixed;
+  inset: var(--nav-height) 0 0;
+  background-color: rgba(0, 0, 0, 0.48);
+  z-index: 90;
+  border: 0;
+  padding: 0;
+  animation: fade-in var(--duration-medium) var(--ease-standard);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 833px) {
+  .list {
+    display: none;
+  }
+
+  .bar {
+    height: var(--nav-height-compact);
+    gap: var(--space-4);
+  }
+
+  .scrim {
+    inset: var(--nav-height-compact) 0 0;
+  }
+
+  .flyoutLink {
+    font-size: var(--fs-19);
+  }
+}

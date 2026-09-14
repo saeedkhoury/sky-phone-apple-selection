@@ -1,0 +1,119 @@
+.hero {
+  position: relative;
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--separator);
+}
+
+.slide {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-9) var(--space-5);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--space-7);
+  animation: slide-in var(--duration-slow) var(--ease-standard);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eyebrow {
+  font-size: var(--fs-14);
+  color: var(--fill-orange);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caption);
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  font-size: var(--fs-56);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--lh-display);
+  margin-bottom: var(--space-4);
+}
+
+.copy {
+  font-size: var(--fs-21);
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-5);
+  max-width: 44ch;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.art {
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+}
+
+.artShape {
+  width: 68%;
+  height: 68%;
+  border-radius: 32px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-6);
+}
+
+.dot {
+  appearance: none;
+  border: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--gray-quaternary);
+  padding: 0;
+  transition: background-color var(--duration-medium) var(--ease-standard);
+}
+
+.dot[aria-current='true'] {
+  background-color: var(--text-primary);
+}
+
+@media (max-width: 833px) {
+  .slide {
+    grid-template-columns: 1fr;
+    padding-block: var(--space-7);
+    text-align: center;
+  }
+
+  .title {
+    font-size: var(--fs-40);
+  }
+
+  .copy {
+    font-size: var(--fs-17);
+    margin-inline: auto;
+  }
+
+  .actions {
+    justify-content: center;
+  }
+
+  .art {
+    order: -1;
+    aspect-ratio: 3 / 2;
+  }
+}
