@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { categories } from '@/lib/catalog/products'
 import { useTheme, type Theme } from '@/lib/theme/ThemeContext'
 import { ChevronIcon } from '../nav/NavIcons'
@@ -59,6 +59,26 @@ const THEME_OPTIONS: readonly { value: Theme; label: string }[] = [
 export function GlobalFooter() {
   const { theme, setTheme } = useTheme()
   const [openColumn, setOpenColumn] = useState<string | null>(null)
+
+  /**
+   * Light/Dark/Auto is a single choice among three, so it is a radio group, not
+   * three independent toggles. That means roving tabindex plus arrow-key
+   * movement between options.
+   */
+  function onThemeKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const keys = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp']
+    if (!keys.includes(event.key)) return
+
+    event.preventDefault()
+    const current = THEME_OPTIONS.findIndex((option) => option.value === theme)
+    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1
+    const next = (current + step + THEME_OPTIONS.length) % THEME_OPTIONS.length
+
+    setTheme(THEME_OPTIONS[next].value)
+    event.currentTarget
+      .querySelectorAll<HTMLButtonElement>('[role="radio"]')
+      [next]?.focus()
+  }
 
   const columns: readonly FooterColumn[] = [
     {
@@ -123,15 +143,18 @@ export function GlobalFooter() {
 
           <div
             className={styles.themeToggle}
-            role="group"
+            role="radiogroup"
             aria-label="Colour theme"
+            onKeyDown={onThemeKeyDown}
           >
             {THEME_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
+                role="radio"
                 className={styles.themeOption}
-                aria-pressed={theme === option.value}
+                aria-checked={theme === option.value}
+                tabIndex={theme === option.value ? 0 : -1}
                 onClick={() => setTheme(option.value)}
               >
                 {option.label}

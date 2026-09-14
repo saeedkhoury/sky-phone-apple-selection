@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { cartReducer, emptyCart, MAX_LINE_QUANTITY } from './reducer'
+import {
+  cartReducer,
+  emptyCart,
+  MAX_LINE_QUANTITY,
+  MAX_UNIT_PRICE,
+  MAX_CART_LINES,
+} from './reducer'
 import {
   selectSubtotal,
   selectLineCount,
@@ -218,5 +224,51 @@ describe('selectIsEmpty', () => {
 
   it('reports a cart with lines as not empty', () => {
     expect(selectIsEmpty(addOnce())).toBe(false)
+  })
+})
+
+describe('cartReducer — HYDRATE hardening against edited localStorage', () => {
+  function storedLine(overrides: Record<string, unknown>) {
+    return { ...item, quantity: 1, ...overrides }
+  }
+
+  it('drops a line whose price exceeds the sane maximum', () => {
+    const next = cartReducer(emptyCart, {
+      type: 'HYDRATE',
+      state: {
+        lines: [storedLine({ unitPrice: Number.MAX_SAFE_INTEGER })],
+      } as unknown as CartState,
+    })
+    expect(next.lines).toEqual([])
+  })
+
+  it('keeps a line priced at exactly the maximum', () => {
+    const next = cartReducer(emptyCart, {
+      type: 'HYDRATE',
+      state: { lines: [storedLine({ unitPrice: MAX_UNIT_PRICE })] } as unknown as CartState,
+    })
+    expect(next.lines).toHaveLength(1)
+  })
+
+  it('caps the number of restored lines', () => {
+    const many = Array.from({ length: MAX_CART_LINES + 25 }, (_, i) =>
+      storedLine({ variantId: `variant-${i}` }),
+    )
+    const next = cartReducer(emptyCart, {
+      type: 'HYDRATE',
+      state: { lines: many } as unknown as CartState,
+    })
+    expect(next.lines).toHaveLength(MAX_CART_LINES)
+  })
+
+  it('rejects a line carrying a __proto__ key without polluting Object.prototype', () => {
+    const next = cartReducer(emptyCart, {
+      type: 'HYDRATE',
+      state: JSON.parse(
+        '{"lines":[{"productId":"a","variantId":"b","name":"n","variantName":"v","slug":"s","unitPrice":100,"quantity":1,"__proto__":{"polluted":true}}]}',
+      ) as CartState,
+    })
+    expect(next.lines).toHaveLength(1)
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined()
   })
 })

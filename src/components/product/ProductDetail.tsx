@@ -6,7 +6,7 @@ import { ProductArt } from './ProductArt'
 import { useCart } from '@/lib/cart/CartContext'
 import { formatPrice } from '@/lib/format/currency'
 import type { Product } from '@/lib/catalog/types'
-import styles from '@/app/product/[slug]/page.module.css'
+import styles from './ProductDetail.module.css'
 
 export function ProductDetail({ product }: { product: Product }) {
   const [variantId, setVariantId] = useState(product.variants[0].id)

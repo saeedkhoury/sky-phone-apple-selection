@@ -14,6 +14,9 @@ export default function HomePage() {
 
   return (
     <>
+      {/* The carousel's product name rotates, so the page's h1 lives here and
+          stays put for screen-reader heading navigation. */}
+      <h1 className="visually-hidden">Axiom Store</h1>
       <HeroCarousel slides={featured} />
 
       <section className="container section">

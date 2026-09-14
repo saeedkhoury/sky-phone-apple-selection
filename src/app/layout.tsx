@@ -11,8 +11,12 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
+  // suppressHydrationWarning is scoped to this element's own attributes. The
+  // theme script below rewrites data-theme before React hydrates, so the
+  // server's "dark" default legitimately differs from the client's value;
+  // without this React reports an unpatchable attribute mismatch.
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         {/* Applies the stored theme before first paint, so there is no flash
             of the wrong palette on load. */}
@@ -20,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       </head>
       <body>
         <CartProvider>
-          <a href="#main" className="visually-hidden">
+          <a href="#main" className="skip-link">
             Skip to main content
           </a>
           <GlobalNav />

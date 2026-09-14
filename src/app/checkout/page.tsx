@@ -31,7 +31,21 @@ export default function CheckoutPage() {
     event.preventDefault()
     const result = validateShipping(form)
     setErrors(result.errors)
-    if (!result.isValid) return
+
+    if (!result.isValid) {
+      // Without this, focus stays on the submit button and a screen-reader user
+      // is not taken to anything that explains the failure.
+      const order: (keyof ShippingForm)[] = [
+        'fullName',
+        'email',
+        'address',
+        'city',
+        'postcode',
+      ]
+      const firstInvalid = order.find((field) => result.errors[field])
+      if (firstInvalid) document.getElementById(firstInvalid)?.focus()
+      return
+    }
 
     // No payment is taken: this records the order locally and empties the bag.
     clear()

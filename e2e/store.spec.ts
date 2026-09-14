@@ -157,11 +157,47 @@ test.describe('checkout', () => {
 test.describe('theme', () => {
   test('switching to light mode persists across a reload', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Light', exact: true }).click()
+    await page.getByRole('radio', { name: 'Light', exact: true }).click()
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
     await page.reload()
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  })
+
+  // The server always renders the dark default (it cannot read localStorage),
+  // while the blocking inline script has already applied the stored theme by
+  // the time React hydrates. These two assert that useSyncExternalStore
+  // reconciles that difference rather than leaving the UI stuck on the default.
+  test('the toggle reflects the stored theme after hydration, not the server default', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await page.getByRole('radio', { name: 'Light', exact: true }).click()
+    await page.reload()
+
+    await expect(page.getByRole('radio', { name: 'Light', exact: true })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+    await expect(page.getByRole('radio', { name: 'Dark', exact: true })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    )
+  })
+
+  test('hydrating with a stored non-default theme logs no React errors', async ({ page }) => {
+    const problems: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'error') problems.push(message.text())
+    })
+    page.on('pageerror', (error) => problems.push(error.message))
+
+    await page.goto('/')
+    await page.getByRole('radio', { name: 'Light', exact: true }).click()
+    await page.reload()
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+    expect(problems.filter((text) => /hydrat|did not match|mismatch/i.test(text))).toEqual([])
   })
 })
 
@@ -205,4 +241,155 @@ test.describe('responsive', () => {
       expect(overflow).toBeLessThanOrEqual(0)
     })
   }
+})
+
+test.describe('security headers', () => {
+  test('serves a CSP and the standard hardening headers', async ({ page }) => {
+    const response = await page.goto('/')
+    const headers = response!.headers()
+
+    expect(headers['content-security-policy']).toContain("default-src 'self'")
+    expect(headers['content-security-policy']).toContain("object-src 'none'")
+    expect(headers['content-security-policy']).toContain("frame-ancestors 'none'")
+    expect(headers['x-content-type-options']).toBe('nosniff')
+    expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin')
+    expect(headers['x-frame-options']).toBe('DENY')
+    expect(headers['permissions-policy']).toContain('camera=()')
+  })
+
+  test('the CSP does not block the inline theme script', async ({ page }) => {
+    const violations: string[] = []
+    page.on('console', (message) => {
+      if (/content security policy/i.test(message.text())) violations.push(message.text())
+    })
+
+    await page.goto('/')
+    await page.getByRole('radio', { name: 'Light', exact: true }).click()
+    await page.reload()
+
+    // If the script were blocked the stored theme would never be applied.
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    expect(violations).toEqual([])
+  })
+})
+
+test.describe('accessibility', () => {
+  test('the skip link becomes visible when focused and jumps to main', async ({ page }) => {
+    await page.goto('/')
+    const skip = page.getByRole('link', { name: 'Skip to main content' })
+
+    await page.keyboard.press('Tab')
+    await expect(skip).toBeFocused()
+
+    // Off-screen until focused; on focus it must be inside the viewport.
+    const box = await skip.boundingBox()
+    expect(box!.x).toBeGreaterThanOrEqual(0)
+
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(/#main/)
+  })
+
+  test('the page has exactly one h1 and it does not change on its own', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('h1')).toHaveCount(1)
+    const before = await page.locator('h1').textContent()
+
+    // Long enough for the carousel to have advanced at least once.
+    await page.waitForTimeout(8000)
+    expect(await page.locator('h1').textContent()).toBe(before)
+  })
+
+  test('the carousel can be stopped and stays stopped', async ({ page }) => {
+    await page.goto('/')
+    const stop = page.getByRole('button', { name: 'Stop the carousel' })
+    await expect(stop).toBeVisible()
+
+    const firstSlide = await page.locator('h2').first().textContent()
+    await stop.click()
+    await expect(page.getByRole('button', { name: 'Start the carousel' })).toBeVisible()
+
+    await page.waitForTimeout(8000)
+    expect(await page.locator('h2').first().textContent()).toBe(firstSlide)
+  })
+
+  test('choosing a slide by hand stops the rotation', async ({ page }) => {
+    await page.goto('/')
+    const dots = page.getByRole('button', { name: /^Show / })
+    await dots.nth(2).click()
+
+    const chosen = await page.locator('h2').first().textContent()
+    await page.waitForTimeout(8000)
+    expect(await page.locator('h2').first().textContent()).toBe(chosen)
+  })
+
+  test('reduced motion stops the carousel advancing on its own', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.goto('/')
+
+    const first = await page.locator('h2').first().textContent()
+    await page.waitForTimeout(8000)
+    expect(await page.locator('h2').first().textContent()).toBe(first)
+  })
+
+  test('the search dialog traps Tab and restores focus on close', async ({ page }) => {
+    await page.goto('/')
+    const trigger = page.getByRole('button', { name: 'Search the store' })
+    await trigger.click()
+
+    const dialog = page.getByRole('dialog', { name: 'Search' })
+    await expect(dialog).toBeVisible()
+
+    // Tab repeatedly; focus must never escape the dialog.
+    for (let i = 0; i < 12; i += 1) {
+      await page.keyboard.press('Tab')
+      const inside = await dialog.evaluate((node) => node.contains(document.activeElement))
+      expect(inside).toBe(true)
+    }
+
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(trigger).toBeFocused()
+  })
+
+  test('a failed checkout moves focus to the first invalid field', async ({ page }) => {
+    await page.goto('/product/pulse-studio')
+    await page.getByRole('button', { name: 'Add to Bag' }).click()
+    await page.goto('/checkout')
+
+    await page.getByRole('button', { name: 'Place order' }).click()
+    await expect(page.getByLabel('Full name')).toBeFocused()
+  })
+
+  test('focus lands on the first field that is actually invalid', async ({ page }) => {
+    await page.goto('/product/pulse-studio')
+    await page.getByRole('button', { name: 'Add to Bag' }).click()
+    await page.goto('/checkout')
+
+    await page.getByLabel('Full name').fill('Saeed Khoury')
+    await page.getByRole('button', { name: 'Place order' }).click()
+    await expect(page.getByLabel('Email address')).toBeFocused()
+  })
+
+  test('the theme control is a radio group operable with arrow keys', async ({ page }) => {
+    await page.goto('/')
+    const group = page.getByRole('radiogroup', { name: 'Colour theme' })
+    await expect(group).toBeVisible()
+
+    await group.getByRole('radio', { name: 'Dark', exact: true }).focus()
+    await page.keyboard.press('ArrowRight')
+
+    await expect(group.getByRole('radio', { name: 'Auto', exact: true })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'auto')
+  })
+
+  test('the flyout scrim is not a keyboard focus target', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Phones', exact: true }).click()
+
+    const scrim = page.locator('[aria-hidden="true"][tabindex="-1"]')
+    await expect(scrim).toHaveAttribute('tabindex', '-1')
+  })
 })

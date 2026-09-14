@@ -85,6 +85,25 @@ ul {
   padding-block: var(--space-8);
 }
 
+/* Hidden until focused, then pinned top-left so a keyboard user can see it. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  left: var(--space-3);
+  top: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-control);
+  text-decoration: none;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

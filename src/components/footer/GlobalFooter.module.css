@@ -81,7 +81,7 @@
     color var(--duration-fast) var(--ease-standard);
 }
 
-.themeOption[aria-pressed='true'] {
+.themeOption[aria-checked='true'] {
   background-color: var(--fill-blue);
   color: #fff;
 }

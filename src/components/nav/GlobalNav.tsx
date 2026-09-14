@@ -21,6 +21,7 @@ export function GlobalNav() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const { itemCount, isHydrated } = useCart()
   const headerRef = useRef<HTMLElement>(null)
+  const searchTriggerRef = useRef<HTMLButtonElement>(null)
 
   const close = useCallback(() => setOpenMenu(null), [])
 
@@ -97,6 +98,7 @@ export function GlobalNav() {
             </button>
 
             <button
+              ref={searchTriggerRef}
               type="button"
               className={styles.iconButton}
               aria-label="Search the store"
@@ -169,16 +171,29 @@ export function GlobalNav() {
         </div>
       </header>
 
+      {/* Pointer-only affordance. Keyboard users close the flyout with Escape
+          or by tabbing out, so the scrim stays out of the tab order rather than
+          presenting a viewport-sized focus target. */}
       {openMenu !== null && (
         <button
           type="button"
           className={styles.scrim}
-          aria-label="Close menu"
+          tabIndex={-1}
+          aria-hidden="true"
           onClick={close}
         />
       )}
 
-      {isSearchOpen && <SearchOverlay onClose={() => setIsSearchOpen(false)} />}
+      {isSearchOpen && (
+        <SearchOverlay
+          onClose={() => {
+            setIsSearchOpen(false)
+            // Return focus to the control that opened the dialog, or the
+            // keyboard user is dumped back at the top of the document.
+            searchTriggerRef.current?.focus()
+          }}
+        />
+      )}
     </>
   )
 }

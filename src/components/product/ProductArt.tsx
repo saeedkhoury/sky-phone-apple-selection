@@ -53,13 +53,16 @@ export function ProductArt({ categoryId, swatch, className, style }: ProductArtP
   // Unique per swatch so multiple tiles on a page never share gradient ids.
   const id = `art-${categoryId}-${swatch.replace('#', '')}`
 
+  // Purely decorative: every usage sits beside the product name in text, so the
+  // artwork is hidden from assistive tech rather than labelled. Deliberately no
+  // role="img" here - that would contradict aria-hidden.
   return (
     <svg
       viewBox="0 0 400 300"
       className={className}
       style={style}
-      role="img"
       aria-hidden="true"
+      focusable="false"
       preserveAspectRatio="xMidYMid meet"
     >
       <Defs id={id} swatch={swatch} />

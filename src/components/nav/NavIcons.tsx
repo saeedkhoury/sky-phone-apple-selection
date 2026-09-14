@@ -69,3 +69,20 @@ export function MenuIcon() {
     </svg>
   )
 }
+
+export function PauseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="3" y="2.5" width="2.6" height="9" rx="1" fill="currentColor" />
+      <rect x="8.4" y="2.5" width="2.6" height="9" rx="1" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function PlayIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M4 2.5 11.5 7 4 11.5z" fill="currentColor" />
+    </svg>
+  )
+}

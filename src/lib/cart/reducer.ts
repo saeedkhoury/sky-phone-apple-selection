@@ -3,6 +3,15 @@ import type { CartAction, CartLine, CartState } from './types'
 /** Retail-style per-line cap, so a stray keystroke cannot order 9999 laptops. */
 export const MAX_LINE_QUANTITY = 10
 
+/**
+ * Upper bounds for state restored from localStorage, which the user can edit
+ * freely in devtools. Nothing here is a security control — there is no backend
+ * to defraud — but it keeps an edited payload from rendering absurd totals or
+ * bloating every subsequent write. $1,000,000 in cents.
+ */
+export const MAX_UNIT_PRICE = 100_000_000
+export const MAX_CART_LINES = 50
+
 export const emptyCart: CartState = { lines: [] }
 
 function isSameLine(line: CartLine, productId: string, variantId: string): boolean {
@@ -29,6 +38,7 @@ function isValidLine(value: unknown): value is CartLine {
     typeof line.slug === 'string' &&
     Number.isInteger(line.unitPrice) &&
     (line.unitPrice as number) >= 0 &&
+    (line.unitPrice as number) <= MAX_UNIT_PRICE &&
     Number.isInteger(line.quantity) &&
     (line.quantity as number) > 0
   )
@@ -36,10 +46,13 @@ function isValidLine(value: unknown): value is CartLine {
 
 function sanitize(state: CartState | undefined): CartState {
   if (!state || !Array.isArray(state.lines)) return emptyCart
-  const lines = state.lines.filter(isValidLine).map((line) => ({
-    ...line,
-    quantity: clampQuantity(line.quantity),
-  }))
+  const lines = state.lines
+    .filter(isValidLine)
+    .slice(0, MAX_CART_LINES)
+    .map((line) => ({
+      ...line,
+      quantity: clampQuantity(line.quantity),
+    }))
   return { lines }
 }
 
