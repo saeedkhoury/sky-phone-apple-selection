@@ -18,14 +18,15 @@ export function ProductTile({ product }: { product: Product }) {
             {t(product.badge === 'new' ? 'new' : 'instock_badge')}
           </span>
         )}
-        <Image
-          src={product.image}
-          alt={product.name}
-          width={320}
-          height={320}
-          className={styles.photo}
-          sizes="(max-width: 734px) 90vw, (max-width: 1068px) 45vw, 320px"
-        />
+        <div className={styles.media}>
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className={styles.photo}
+            sizes="(max-width: 734px) 90vw, (max-width: 1068px) 45vw, 320px"
+          />
+        </div>
       </div>
       <div className={styles.body}>
         <h3 className={styles.name}>{product.name}</h3>

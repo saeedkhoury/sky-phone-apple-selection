@@ -30,9 +30,16 @@
 
 .brand {
   justify-self: start;
-  font-size: var(--fs-19);
-  font-weight: 600;
-  letter-spacing: var(--tracking-display);
+  /* The wordmark intentionally contrasts with the utility navigation: a
+     restrained high-contrast serif and generous tracking recreate the
+     editorial "SKY PHONE" mark supplied by the owner without adding a remote
+     font request or a logo image. */
+  font-family: "Bodoni 72", Didot, "Bodoni MT", "Times New Roman", serif;
+  font-size: clamp(16px, 1.2vw, 19px);
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  line-height: 1;
+  text-transform: uppercase;
   color: var(--nav-color-hover);
   text-decoration: none;
   white-space: nowrap;
@@ -253,6 +260,13 @@
   .bar {
     height: var(--nav-height-compact);
     gap: var(--space-4);
+  }
+
+  .brand {
+    /* Keep the full mark legible beside the three navigation actions on
+       compact handsets, rather than allowing it to crowd or wrap. */
+    font-size: 16px;
+    letter-spacing: 0.19em;
   }
 
   .scrim {

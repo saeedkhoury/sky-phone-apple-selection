@@ -178,7 +178,9 @@ test.describe('hero', () => {
     await page.goto('/en')
     await page.getByRole('button', { name: 'Repairs', exact: true }).click()
 
-    const art = page.locator('section[aria-roledescription="carousel"] img')
+    const art = page.locator(
+      'section[aria-roledescription="carousel"] [data-hero-active="true"] img',
+    )
     await expect(art).toHaveAttribute('src', /repair-collage/)
   })
 
@@ -189,7 +191,9 @@ test.describe('hero', () => {
     // an oversized variant and never finished loading.
     for (const name of ['iPhone Duo', 'iPhone 18 Pro', 'PlayStation 5', 'Repairs']) {
       await page.getByRole('button', { name, exact: true }).click()
-      const art = page.locator('section[aria-roledescription="carousel"] img')
+      const art = page.locator(
+        'section[aria-roledescription="carousel"] [data-hero-active="true"] img',
+      )
 
       await expect
         .poll(
@@ -207,9 +211,9 @@ test.describe('hero', () => {
     await page.getByRole('button', { name: 'PlayStation 5', exact: true }).click()
 
     const layout = await page
-      .locator('section[aria-roledescription="carousel"]')
-      .evaluate((carousel) => {
-        const image = carousel.querySelector('img')
+      .locator('section[aria-roledescription="carousel"] [data-hero-active="true"]')
+      .evaluate((activeSlide) => {
+        const image = activeSlide.querySelector('img')
         const frame = image?.parentElement
         const art = frame?.parentElement
 
@@ -226,6 +230,7 @@ test.describe('hero', () => {
         }
 
         return {
+          card: bounds(activeSlide),
           art: bounds(art),
           image: bounds(image),
           objectFit: getComputedStyle(image).objectFit,
@@ -238,6 +243,132 @@ test.describe('hero', () => {
     expect(layout!.image.right).toBeLessThanOrEqual(layout!.art.right)
     expect(layout!.image.bottom).toBeLessThanOrEqual(layout!.art.bottom)
     expect(layout!.image.left).toBeGreaterThanOrEqual(layout!.art.left)
+    expect(layout!.art.top).toBeGreaterThanOrEqual(layout!.card.top)
+    expect(layout!.art.right).toBeLessThanOrEqual(layout!.card.right)
+    expect(layout!.art.bottom).toBeLessThanOrEqual(layout!.card.bottom)
+    expect(layout!.art.left).toBeGreaterThanOrEqual(layout!.card.left)
+  })
+
+  test('the mobile PS5 art plate stays inside its carousel card', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/en')
+    await page.getByRole('button', { name: 'PlayStation 5', exact: true }).click()
+
+    const layout = await page
+      .locator('section[aria-roledescription="carousel"] [data-hero-active="true"]')
+      .evaluate((card) => {
+        const art = card.querySelector('div[class*="art"]')
+        const frame = art?.querySelector('div')
+        if (!art || !frame) return null
+
+        const bounds = (element: Element) => {
+          const rect = element.getBoundingClientRect()
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+          }
+        }
+
+        return {
+          card: bounds(card),
+          art: bounds(art),
+          frame: bounds(frame),
+        }
+      })
+
+    expect(layout).not.toBeNull()
+    expect(layout!.art.top).toBeGreaterThanOrEqual(layout!.card.top)
+    expect(layout!.art.right).toBeLessThanOrEqual(layout!.card.right)
+    expect(layout!.art.bottom).toBeLessThanOrEqual(layout!.card.bottom)
+    expect(layout!.art.left).toBeGreaterThanOrEqual(layout!.card.left)
+    expect(layout!.frame.right).toBeLessThanOrEqual(layout!.art.right)
+  })
+
+  test('centres the active slide as a rounded block with neighbours in view', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/en')
+    await page.getByRole('button', { name: 'iPhone 18 Pro', exact: true }).click()
+    await page.waitForTimeout(800)
+
+    const layout = await page
+      .locator('section[aria-roledescription="carousel"]')
+      .evaluate((carousel) => {
+        const viewport = carousel.querySelector('div[class*="viewport"]')
+        const active = carousel.querySelector('[data-active="true"]')
+        if (!viewport || !active) return null
+
+        const viewportBox = viewport.getBoundingClientRect()
+        const activeBox = active.getBoundingClientRect()
+        const neighbourCount = [...carousel.querySelectorAll('[data-active="false"]')].filter(
+          (card) => {
+            const box = card.getBoundingClientRect()
+            return box.right > viewportBox.left && box.left < viewportBox.right
+          },
+        ).length
+
+        return {
+          activeCenter: activeBox.left + activeBox.width / 2,
+          borderRadius: Number.parseFloat(getComputedStyle(active).borderTopLeftRadius),
+          neighbourCount,
+          viewportCenter: viewportBox.left + viewportBox.width / 2,
+        }
+      })
+
+    expect(layout).not.toBeNull()
+    expect(Math.abs(layout!.activeCenter - layout!.viewportCenter)).toBeLessThan(3)
+    expect(layout!.borderRadius).toBeGreaterThanOrEqual(22)
+    expect(layout!.neighbourCount).toBeGreaterThanOrEqual(2)
+  })
+
+  test('centres a manually selected slide in right-to-left layouts', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/he')
+    await page.getByRole('button', { name: 'iPhone 18 Pro', exact: true }).click()
+    await page.waitForTimeout(800)
+
+    const layout = await page
+      .locator('section[aria-roledescription="carousel"]')
+      .evaluate((carousel) => {
+        const viewport = carousel.querySelector('div[class*="viewport"]')
+        const active = carousel.querySelector('[data-active="true"]')
+        if (!viewport || !active) return null
+
+        const viewportBox = viewport.getBoundingClientRect()
+        const activeBox = active.getBoundingClientRect()
+        return {
+          activeCenter: activeBox.left + activeBox.width / 2,
+          viewportCenter: viewportBox.left + viewportBox.width / 2,
+        }
+      })
+
+    expect(layout).not.toBeNull()
+    expect(Math.abs(layout!.activeCenter - layout!.viewportCenter)).toBeLessThan(3)
+  })
+
+  test('does not pull a reader back to the hero when it is off screen', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/en')
+    // Wait for the first-paint splash to finish so the document can be read
+    // and scrolled exactly as a visitor would.
+    await page.waitForTimeout(2_000)
+
+    const before = await page.evaluate(() => {
+      // The app normally scrolls smoothly. Switch it off in this test so the
+      // measured starting point is the bottom of the document immediately.
+      document.documentElement.style.scrollBehavior = 'auto'
+      window.scrollTo(0, document.documentElement.scrollHeight)
+      return window.scrollY
+    })
+    expect(before).toBeGreaterThan(400)
+
+    // Let the current auto-rotation interval elapse. If it is not paused
+    // outside the viewport, a document-level scroll would send us back up.
+    await page.waitForTimeout(7_600)
+    const after = await page.evaluate(() => window.scrollY)
+
+    expect(Math.abs(after - before)).toBeLessThan(80)
   })
 
   test('the iPhone Duo slide links through to Apple products', async ({ page }) => {
@@ -278,6 +409,50 @@ test.describe('tile grid consistency', () => {
       }),
     )
     expect(Math.max(...boxes)).toBeLessThan(2)
+  })
+
+  test('a tall Samsung product stays fully inside its art area', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 950 })
+    await page.goto('/en')
+    await page.waitForLoadState('networkidle')
+
+    const layout = await page
+      .locator('a')
+      .filter({ has: page.getByRole('heading', { name: 'Galaxy S25', level: 3, exact: true }) })
+      .evaluate((tile) => {
+        const art = tile.querySelector('div[class*="art"]')
+        const media = tile.querySelector('div[class*="media"]')
+        const image = media?.querySelector('img')
+        const body = tile.querySelector('div[class*="body"]')
+
+        if (!art || !media || !image || !body) return null
+
+        const bounds = (element: Element) => {
+          const rect = element.getBoundingClientRect()
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+          }
+        }
+
+        return {
+          art: bounds(art),
+          media: bounds(media),
+          image: bounds(image),
+          body: bounds(body),
+          objectFit: getComputedStyle(image).objectFit,
+        }
+      })
+
+    expect(layout).not.toBeNull()
+    expect(layout!.objectFit).toBe('contain')
+    expect(layout!.media.top).toBeGreaterThanOrEqual(layout!.art.top)
+    expect(layout!.media.right).toBeLessThanOrEqual(layout!.art.right)
+    expect(layout!.media.bottom).toBeLessThanOrEqual(layout!.art.bottom)
+    expect(layout!.media.left).toBeGreaterThanOrEqual(layout!.art.left)
+    expect(layout!.image.bottom).toBeLessThanOrEqual(layout!.body.top)
   })
 })
 
