@@ -40,8 +40,10 @@
 }
 
 .artImage {
-  width: 84%;
-  height: 84%;
+  max-width: 88%;
+  max-height: 88%;
+  width: auto;
+  height: auto;
   object-fit: contain;
 }
 
@@ -89,6 +91,8 @@
   padding: var(--space-4);
   background: radial-gradient(65% 60% at 50% 45%, #ffffff, #e9e9ee);
   border-radius: var(--radius-card);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .artShape {

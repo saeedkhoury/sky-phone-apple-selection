@@ -24,13 +24,22 @@
   place-items: center;
   padding: var(--space-5);
   background: var(--photo-ground);
+  /* aspect-ratio only sets a preferred height: without these, a tall product
+     render (a phone shot at 2:3) stretches the box and the tiles in a row end
+     up with visibly different image areas. */
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Product photography is shot on white; a light plate keeps it from floating
    on the dark ground as a bright rectangle. */
 .photo {
-  width: 100%;
-  height: 100%;
+  /* Fit inside the square rather than filling it, so the image can never be
+     the thing that decides the box's height. */
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   transition: transform var(--duration-medium) var(--ease-standard);
 }

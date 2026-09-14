@@ -209,6 +209,39 @@ test.describe('hero', () => {
   })
 })
 
+test.describe('tile grid consistency', () => {
+  test('every product tile has the same image area', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 950 })
+    await page.goto('/en/store/all?brand=apple')
+    await page.waitForLoadState('networkidle')
+
+    // A tall product render used to stretch its own tile, so a row of tiles had
+    // visibly different image areas.
+    const heights = await page.evaluate(() =>
+      [...document.querySelectorAll('a[class*="tile"] div[class*="art"]')].map((el) =>
+        Math.round(el.getBoundingClientRect().height),
+      ),
+    )
+
+    expect(heights.length).toBeGreaterThan(3)
+    expect(new Set(heights).size).toBe(1)
+  })
+
+  test('image boxes stay square', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 950 })
+    await page.goto('/en/store/phones')
+    await page.waitForLoadState('networkidle')
+
+    const boxes = await page.evaluate(() =>
+      [...document.querySelectorAll('a[class*="tile"] div[class*="art"]')].map((el) => {
+        const r = el.getBoundingClientRect()
+        return Math.abs(r.width - r.height)
+      }),
+    )
+    expect(Math.max(...boxes)).toBeLessThan(2)
+  })
+})
+
 test.describe('hero typography', () => {
   test('the headline uses the primary text colour, not the muted one', async ({ page }) => {
     await page.goto('/en')
