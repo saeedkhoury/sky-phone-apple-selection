@@ -54,6 +54,14 @@ imagery is generated SVG (`src/components/product/ProductArt.tsx`).
 - **GREEN:** 21 cases pass.
 - **Guarantees:** empty and whitespace queries return everything; case-insensitive and partial matching; no-match returns `[]`; name matches rank first; sorts return new arrays; catalog data integrity (unique slugs, known categories, ≥1 variant, positive integer prices).
 
+### Task 4 — Checkout validation (`src/lib/checkout/validate.ts`)
+
+- **Summary:** Validates all five delivery fields at once and bounds field length.
+- **Command:** `npx vitest run src/lib/checkout`
+- **RED:** `Failed to resolve import "./validate"` — `Test Files 1 failed (1)`, compile-time RED.
+- **GREEN:** `Test Files 1 passed (1) · Tests 13 passed (13)`; later extended to 17 to cover every field's length-bound branch.
+- **Guarantees:** every invalid field is reported in one pass (not first-error-only); whitespace is trimmed before validating; over-long input is rejected.
+
 ### Task 5 — Theme store (`src/lib/theme/themeStore.ts`)
 
 - **Summary:** Theme lives outside React in a module-level external store read via
@@ -70,14 +78,6 @@ imagery is generated SVG (`src/components/product/ProductArt.tsx`).
   document attribute and notifies subscribers; unsubscribe stops notification;
   a throwing `localStorage` (private mode, quota) still applies the theme; and
   the shipped inline script applies a stored theme and ignores an invalid one.
-
-### Task 4 — Checkout validation (`src/lib/checkout/validate.ts`)
-
-- **Summary:** Validates all five delivery fields at once and bounds field length.
-- **Command:** `npx vitest run src/lib/checkout`
-- **RED:** `Failed to resolve import "./validate"` — `Test Files 1 failed (1)`, compile-time RED.
-- **GREEN:** `Test Files 1 passed (1) · Tests 13 passed (13)`; later extended to 17 to cover every field's length-bound branch.
-- **Guarantees:** every invalid field is reported in one pass (not first-error-only); whitespace is trimmed before validating; over-long input is rejected.
 
 ## 4. Test specification
 
