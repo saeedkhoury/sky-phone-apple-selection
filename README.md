@@ -31,6 +31,9 @@ navigation, and the browser-local bag are included. See the
 - Localized `/he`, `/ar`, and `/en` routes with correct right-to-left layout.
 - Product catalogue, category/brand filters, search, product variants, and a
   browser-local shopping bag.
+- Consistent category-first, newest-model-first product ordering across the
+  homepage, catalog, menus, search, and support suggestions. See the
+  [catalog ordering guide](docs/catalog-ordering.md) when adding products.
 - WhatsApp and telephone handoff for sales and repair enquiries; no simulated
   payment checkout.
 - Accessible navigation, theme handling, carousel controls, security headers,

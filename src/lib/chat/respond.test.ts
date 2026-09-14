@@ -77,6 +77,13 @@ describe('respond — products', () => {
     expect(respond('iphone').products.length).toBeLessThanOrEqual(3)
   })
 
+  it('suggests the newest iPhones first for a general product question', () => {
+    expect(respond('iphone').products.map((product) => product.name)).toEqual([
+      'iPhone 17 Pro Max', 'iPhone 17 Pro', 'iPhone 17',
+    ])
+    expect(respond('how much is iPhone 15 Pro').products[0].name).toBe('iPhone 15 Pro')
+  })
+
   it('asks which product for a bare price question', () => {
     expect(respond('what are your prices?').intent).toBe('price')
   })

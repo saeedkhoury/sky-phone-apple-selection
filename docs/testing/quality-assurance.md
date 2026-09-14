@@ -35,6 +35,10 @@ The shared hero regression suite exercises repeated forward/backward loops in
 all three languages, mobile dragging, seven-second holds, continued playback
 after manual navigation, and the explicit pause/resume control. Reduced-motion
 mode keeps the seven-second cadence but changes slides without sliding animation.
+The catalog-ordering suite checks category/brand grouping, newer models first,
+homepage highlights, category art, navigation menus, and desktop/mobile search
+suggestions. These checks run against development, the static export, and the
+public URL. See [Product display order](../catalog-ordering.md) for the data policy.
 For deployments, also complete the manual smoke tests in
 [Owner Approval & Launch Checklist](../owner-approval-and-launch.md).
 

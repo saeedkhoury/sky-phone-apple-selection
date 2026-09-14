@@ -24,6 +24,11 @@ export interface Product {
   name: string
   categoryId: string
   brand: string
+  /** Newest-first position within category + brand; lower comes first.
+   * Keep a generation together, with Pro Max/Ultra before Pro and base models.
+   * This is a reviewed display position, not an inferred release date.
+   */
+  displayOrder: number
   /** Line-icon key used as the fallback when a photo fails to load. */
   icon: string
   badge?: 'new' | 'hot' | string
@@ -48,4 +53,4 @@ export interface Brand {
   name: string
 }
 
-export type SortOrder = 'featured' | 'price-asc' | 'price-desc' | 'name'
+export type SortOrder = 'newest' | 'featured' | 'price-asc' | 'price-desc' | 'name'

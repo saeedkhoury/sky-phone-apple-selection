@@ -1,5 +1,6 @@
 import type { Locale } from '@/lib/i18n/config'
 import { products } from './products'
+import { compareCatalogProducts, orderCatalogProducts } from './ordering'
 import type { Product, SortOrder } from './types'
 
 /** Weighted so a name hit always outranks a description-only hit. */
@@ -10,16 +11,16 @@ const WEIGHT_DESCRIPTION = 1
 
 function scoreProduct(product: Product, needle: string, locale: Locale): number {
   const name = product.name.toLowerCase()
-  let score = 0
-
-  if (name === needle) score += WEIGHT_EXACT_NAME
-  if (name.includes(needle)) score += WEIGHT_NAME
-  if (product.brand.toLowerCase().includes(needle)) score += WEIGHT_BRAND
+  if (name === needle) return WEIGHT_EXACT_NAME
+  // A brand query is browsing the brand, not favoring products that happen
+  // to repeat it in their name ("Apple Watch" must not outrank all iPhones).
+  if (product.brand.toLowerCase() === needle) return WEIGHT_BRAND
+  if (name.includes(needle)) return WEIGHT_NAME
+  if (product.brand.toLowerCase().includes(needle)) return WEIGHT_BRAND
   if (product.description[locale]?.toLowerCase().includes(needle)) {
-    score += WEIGHT_DESCRIPTION
+    return WEIGHT_DESCRIPTION
   }
-
-  return score
+  return 0
 }
 
 /**
@@ -32,12 +33,12 @@ export function searchProducts(
   locale: Locale,
 ): readonly Product[] {
   const needle = query.trim().toLowerCase()
-  if (needle === '') return [...source]
+  if (needle === '') return orderCatalogProducts(source)
 
   return source
     .map((product) => ({ product, score: scoreProduct(product, needle, locale) }))
     .filter((entry) => entry.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score || compareCatalogProducts(a.product, b.product))
     .map((entry) => entry.product)
 }
 
@@ -66,7 +67,7 @@ export function priceForVariant(product: Product, storageLabel?: string): number
 
 export function sortProducts(
   source: readonly Product[],
-  order: SortOrder,
+  order: SortOrder = 'newest',
 ): readonly Product[] {
   const copy = [...source]
 
@@ -78,8 +79,9 @@ export function sortProducts(
     case 'name':
       return copy.sort((a, b) => a.name.localeCompare(b.name))
     case 'featured':
+    case 'newest':
     default:
-      return copy.sort((a, b) => Number(Boolean(b.badge)) - Number(Boolean(a.badge)))
+      return copy.sort(compareCatalogProducts)
   }
 }
 
@@ -91,9 +93,9 @@ export function getProductsByCategory(categoryId: string): readonly Product[] {
   return filterByCategory(products, categoryId)
 }
 
-/** Brand highlight rows on the home page, badged products first. */
+/** Brand highlight rows use the same category/newest-first order as the store. */
 export function getHighlights(brandId: string, limit: number): readonly Product[] {
-  return sortProducts(filterByBrand(products, brandId), 'featured').slice(0, limit)
+  return sortProducts(filterByBrand(products, brandId)).slice(0, limit)
 }
 
 export function getBadgedProducts(limit: number): readonly Product[] {

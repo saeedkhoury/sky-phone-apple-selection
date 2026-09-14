@@ -18,7 +18,7 @@ export function CategoryResults({ locale, category }: { locale: Locale; category
   const t = (key: string) => translate(locale, key)
 
   const inCategory = filterByCategory(products, category)
-  const items = sortProducts(filterByBrand(inCategory, activeBrand), 'featured')
+  const items = sortProducts(filterByBrand(inCategory, activeBrand))
 
   // Only offer brands that actually have stock in this category, so the filter
   // row can never lead to an empty result.

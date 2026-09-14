@@ -9,19 +9,11 @@ import { Button } from '@/components/ui/Button'
 import { RepairStrip } from '@/components/repairs/RepairStrip'
 import { ReelsRow } from '@/components/reels/ReelsRow'
 import { categories } from '@/lib/catalog/categories'
-import { getHighlights, getProductBySlug } from '@/lib/catalog/query'
+import { getHighlights, getProductBySlug, getProductsByCategory } from '@/lib/catalog/query'
 import { isLocale, translate } from '@/lib/i18n/config'
 import { SHOP } from '@/lib/shop'
 import { notFound } from 'next/navigation'
 import styles from './page.module.css'
-
-const CATEGORY_ART: Record<string, string> = {
-  phones: '/img/iphone15pro-naturaltitanium-1.png',
-  tablets: '/img/ipadair-spacegray-1.png',
-  computers: '/img/macbookair-midnight-1.png',
-  gaming: '/img/ps5-1.png',
-  accessories: '/img/airpodspro-default-1.png',
-}
 
 export default async function HomePage({ params }: PageProps<'/[locale]'>) {
   const { locale } = await params
@@ -117,7 +109,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             >
               <span className={styles.categoryArt}>
                 <Image
-                  src={assetPath(CATEGORY_ART[category.id] ?? '/img/charger.webp')}
+                  src={assetPath(getProductsByCategory(category.id)[0]?.image ?? '/img/charger.webp')}
                   alt=""
                   width={180}
                   height={180}

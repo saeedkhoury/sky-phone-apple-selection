@@ -5,7 +5,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/skyphone-ca'
 
 export default defineConfig({
   testDir: './e2e',
-  testMatch: ['pages.spec.ts', 'hero-loop.spec.ts'],
+  testMatch: ['pages.spec.ts', 'hero-loop.spec.ts', 'catalog-ordering.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

@@ -1,6 +1,6 @@
 import type { Brand, Category } from './types'
 
-/** Order matches the shop's own site so the owner recognises it. */
+/** Shared browsing priority: phones, tablets, laptops, gaming, accessories. */
 export const categories: readonly Category[] = [
   { id: 'phones', labelKey: 'cat_phones' },
   { id: 'tablets', labelKey: 'cat_tablets' },

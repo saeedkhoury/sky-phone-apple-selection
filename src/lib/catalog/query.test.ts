@@ -7,6 +7,7 @@ import {
   getProductBySlug,
   getHighlights,
   getProductsByCategory,
+  getBadgedProducts,
   priceForVariant,
 } from './query'
 import { products } from './products'
@@ -184,17 +185,74 @@ describe('sortProducts', () => {
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
   })
 
-  it('puts badged products first when sorting by featured', () => {
-    const sorted = sortProducts(products, 'featured')
-    const lastBadged = sorted.map((p) => Boolean(p.badge)).lastIndexOf(true)
-    const firstPlain = sorted.findIndex((p) => !p.badge)
-    expect(lastBadged).toBeLessThan(firstPlain === -1 ? Infinity : firstPlain)
+  it('uses the shared newest-first order for default, newest, and legacy featured sorting', () => {
+    const shuffled = [...products].reverse()
+    expect(sortProducts(shuffled)).toEqual(products)
+    expect(sortProducts(shuffled, 'newest')).toEqual(products)
+    expect(sortProducts(shuffled, 'featured')).toEqual(products)
   })
 
   it('returns a new array rather than sorting in place', () => {
     const before = [...products]
     sortProducts(products, 'price-desc')
     expect(products).toEqual(before)
+  })
+})
+
+describe('consistent merchandising', () => {
+  const names = (items: readonly { name: string }[]) => items.map((product) => product.name)
+  const iphones = ['iPhone 17 Pro Max', 'iPhone 17 Pro', 'iPhone 17', 'iPhone 15 Pro', 'iPhone 14']
+
+  it('requires a unique positive display position within each category and brand', () => {
+    expect(products.every((product) => Number.isInteger(product.displayOrder) && product.displayOrder > 0)).toBe(true)
+    const positions = products.map((product) => `${product.categoryId}/${product.brand}/${product.displayOrder}`)
+    expect(new Set(positions).size).toBe(products.length)
+  })
+
+  it('groups all phones before tablets, computers, gaming, and accessories', () => {
+    const groups = products.map((product) => product.categoryId).filter((category, index, all) => index === 0 || all[index - 1] !== category)
+    expect(groups).toEqual(['phones', 'tablets', 'computers', 'gaming', 'accessories'])
+  })
+
+  it('keeps Apple generations newest first and Pro Max ahead of Pro and base', () => {
+    expect(names(filterByBrand(getProductsByCategory('phones'), 'apple'))).toEqual(iphones)
+    expect(names(getHighlights('apple', 3))).toEqual(iphones.slice(0, 3))
+    expect(names(getBadgedProducts(3))).toEqual(iphones.slice(0, 3))
+  })
+
+  it('orders Samsung generations and premium variants consistently', () => {
+    expect(names(getHighlights('samsung', 3))).toEqual(['Galaxy S25 Ultra', 'Galaxy S25', 'Galaxy S24 Ultra'])
+  })
+
+  it('orders tablets, laptops, Sony products, and accessories independently of badges', () => {
+    expect(names(filterByBrand(getProductsByCategory('tablets'), 'apple'))).toEqual(['iPad Pro', 'iPad Air', 'iPad'])
+    expect(names(filterByBrand(getProductsByCategory('computers'), 'apple'))).toEqual(['MacBook Pro 14"', 'MacBook Air'])
+    expect(names(getHighlights('sony', 2))).toEqual(['PlayStation 5', 'PS5 DualSense'])
+    expect(names(filterByBrand(getProductsByCategory('accessories'), 'apple'))).toEqual(['AirPods 4', 'Apple Watch Ultra 2', 'Apple Watch S9', 'AirPods Pro 2'])
+  })
+
+  it('does not let an older model’s badge override a newer model', () => {
+    const older = { ...getProductBySlug('iphone-15-pro')!, badge: 'new' }
+    const newer = { ...getProductBySlug('iphone-17-pro-max')!, badge: undefined }
+    expect(names(sortProducts([older, newer]))).toEqual([newer.name, older.name])
+  })
+
+  it('places a future iPhone 16 catalog entry between generations 17 and 15', () => {
+    // A test fixture only; no model, price, or availability is added to the store.
+    const fixture = { ...getProductBySlug('iphone-17-pro-max')!, slug: 'test-iphone-16-pro-max', name: 'iPhone 16 Pro Max', displayOrder: 40 }
+    const source = [...filterByBrand(getProductsByCategory('phones'), 'apple'), fixture].reverse()
+    expect(names(sortProducts(source))).toEqual([...iphones.slice(0, 3), fixture.name, ...iphones.slice(3)])
+    expect(source[0]).toEqual(fixture)
+  })
+
+  it('orders equally relevant search results consistently in every language', () => {
+    for (const locale of LOCALES) {
+      expect(names(searchProducts([...products].reverse(), 'iphone', locale))).toEqual(iphones)
+      expect(names(searchProducts([...products].reverse(), 'apple', locale)).slice(0, 5)).toEqual(iphones)
+      expect(searchProducts([...products].reverse(), '', locale)).toEqual(products)
+      // A specifically requested older product should still be the first hit.
+      expect(searchProducts(products, 'iPhone 14', locale)[0].slug).toBe('iphone-14')
+    }
   })
 })
 
