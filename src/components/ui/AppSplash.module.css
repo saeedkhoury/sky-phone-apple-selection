@@ -1,0 +1,106 @@
+/*
+ * First-paint splash. Deliberately CSS-only: a JS-driven overlay that fails to
+ * unmount would cover the whole shop, so this can never get stuck — the
+ * animation always ends hidden, whether or not any script runs.
+ */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: grid;
+  place-items: center;
+  background-color: var(--bg-page);
+  animation: splash-out 0.45s var(--ease-standard) 1.05s forwards;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  animation: stack-in 0.6s var(--ease-standard) both;
+}
+
+.markWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+}
+
+/* A slow sweep behind the mark, masked into a ring by the inner disc. */
+.halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--fill-blue) 110deg,
+    transparent 220deg
+  );
+  animation: sweep 1.1s linear infinite;
+}
+
+.halo::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background-color: var(--bg-page);
+}
+
+.mark {
+  position: relative;
+  border-radius: 22px;
+}
+
+.name {
+  font-size: var(--fs-24);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--text-primary);
+}
+
+.est {
+  font-size: var(--fs-12);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: -8px;
+}
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes stack-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The global reduced-motion reset zeroes these durations, so the splash lands
+   on its end state (hidden) almost immediately, which is the right behaviour. */
+@media (prefers-reduced-motion: reduce) {
+  .halo {
+    background: none;
+    border: 2px solid var(--separator);
+    border-top-color: var(--fill-blue);
+  }
+}

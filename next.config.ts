@@ -54,6 +54,21 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  images: {
+    /**
+     * The catalogue is ~330 pre-sized local files (many already WebP) served
+     * from this same origin, with no CDN in front. Running them through the
+     * image optimiser bought nothing and actively broke the dev server: under
+     * concurrency it wedged and left product photos permanently undecoded
+     * (11 of 14 on the Apple-filtered listing, stuck for 15s+). Serving them
+     * directly is both correct and faster here.
+     *
+     * If a future version adds user-uploaded or remote imagery, turn this back
+     * on for those sources.
+     */
+    unoptimized: true,
+  },
+
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },

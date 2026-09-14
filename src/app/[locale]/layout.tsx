@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { GlobalNav } from '@/components/nav/GlobalNav'
 import { GlobalFooter } from '@/components/footer/GlobalFooter'
 import { SupportChat } from '@/components/chat/SupportChat'
+import { AppSplash } from '@/components/ui/AppSplash'
 import { CartProvider } from '@/lib/cart/CartContext'
 import { LocaleProvider } from '@/lib/i18n/LocaleContext'
 import {
@@ -55,6 +56,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
+        <AppSplash locale={locale} />
         <LocaleProvider locale={locale}>
           <CartProvider>
             <a href="#main" className="skip-link">

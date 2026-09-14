@@ -28,39 +28,68 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
 
   const t = (key: string) => translate(locale, key)
   const ps5 = getProductBySlug('playstation-5')
+  const allApple = `/${locale}/store/all?brand=apple`
 
+  // The shop's own four hero ads, carried over as-authored.
   const slides: HeroSlide[] = [
     {
+      id: 'duo',
+      badgeKey: 'soon_badge',
+      title: 'iPhone Duo',
+      tagKey: 'ad_duo_tag',
+      noteKey: 'ad_duo_note',
+      image: '/img/iphone-duo.png',
+      alt: 'iPhone Duo',
+      ctas: [
+        { labelKey: 'ad_duo_cta', variant: 'primary', whatsappKey: 'wa_duo' },
+        { labelKey: 'ad_i18_cta2', variant: 'secondary', href: allApple },
+      ],
+    },
+    {
       id: 'iphone18',
-      tagKey: 'ad_i18_tag',
+      badgeKey: 'soon_badge',
       title: 'iPhone 18 Pro',
+      tagKey: 'ad_i18_tag',
       noteKey: 'ad_i18_note',
       image: '/img/iphone18-pro.png',
-      ground: 'light',
-      whatsappKey: 'wa_i18',
+      alt: 'iPhone 18 Pro',
+      ctas: [
+        { labelKey: 'ad_i18_cta', variant: 'primary', whatsappKey: 'wa_i18' },
+        { labelKey: 'ad_i18_cta2', variant: 'secondary', href: allApple },
+      ],
     },
     ...(ps5
       ? [
           {
             id: 'ps5',
-            tagKey: 'ps5_tag',
+            badgeKey: 'instock_badge',
             title: ps5.name,
-            image: ps5.image,
-            ground: 'light' as const,
-            href: `/${locale}/product/${ps5.slug}`,
+            tagKey: 'ps5_tag',
+            image: '/img/ps5-2.png',
+            alt: ps5.name,
             product: ps5,
+            ctas: [
+              {
+                labelKey: 'ps5_cta1',
+                variant: 'primary' as const,
+                href: `/${locale}/product/${ps5.slug}`,
+              },
+              { labelKey: 'ask_wa', variant: 'secondary' as const, whatsappKey: 'wa_ps5' },
+            ],
           },
         ]
       : []),
     {
       id: 'repairs',
-      tagKey: 'rp_title',
-      title: t('rp_hero_tag'),
-      noteKey: 'rp_sub',
-      image: '/img/gaming-controller.png',
-      ground: 'dark',
-      href: `/${locale}/repairs`,
-      whatsappKey: 'wa_chat_head',
+      badgeKey: 'sameday_badge',
+      title: t('rp_title'),
+      tagKey: 'rp_hero_tag',
+      image: '/img/repair-collage.png',
+      alt: t('rp_title'),
+      ctas: [
+        { labelKey: 'fy_cta2', variant: 'primary', href: `/${locale}/repairs` },
+        { labelKey: 'fy_cta1', variant: 'secondary', href: `/${locale}/store/all` },
+      ],
     },
   ]
 
@@ -105,7 +134,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
         <SectionHeader
           title={t('apple_head')}
           subtitle={t('apple_sub')}
-          action={{ href: `/${locale}/store/phones`, label: t('filter_all') }}
+          action={{ href: allApple, label: t('filter_all') }}
         />
         <TileGrid columns={3}>
           {appleHighlights.map((product) => (
@@ -115,7 +144,11 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
       </section>
 
       <section className="container section">
-        <SectionHeader title={t('samsung_head')} subtitle={t('samsung_sub')} />
+        <SectionHeader
+          title={t('samsung_head')}
+          subtitle={t('samsung_sub')}
+          action={{ href: `/${locale}/store/all?brand=samsung`, label: t('filter_all') }}
+        />
         <TileGrid columns={3}>
           {samsungHighlights.map((product) => (
             <ProductTile key={product.id} product={product} />

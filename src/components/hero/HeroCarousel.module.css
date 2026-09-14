@@ -15,16 +15,12 @@
   animation: slide-in var(--duration-slow) var(--ease-standard);
 }
 
-/* Cut-out product art needs its own ground, the way apple.com/il stages a hero.
-   Light for a product shot, dark for the service slide. */
-.slide[data-ground='light'] .art {
-  background: radial-gradient(65% 60% at 50% 45%, #ffffff, #e9e9ee);
-  border-radius: var(--radius-card);
-}
-
-.slide[data-ground='dark'] .art {
-  background: radial-gradient(65% 60% at 50% 45%, #202024, #0a0a0c);
-  border-radius: var(--radius-card);
+.tag {
+  font-size: var(--fs-21);
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+  max-width: 40ch;
 }
 
 .copy {
@@ -71,17 +67,10 @@
 .title {
   font-size: var(--fs-56);
   font-weight: 600;
+  color: var(--text-primary);
   letter-spacing: var(--tracking-display);
   line-height: var(--lh-display);
   margin-bottom: var(--space-4);
-}
-
-.copy {
-  font-size: var(--fs-21);
-  color: var(--text-secondary);
-  letter-spacing: var(--tracking-tight);
-  margin-bottom: var(--space-5);
-  max-width: 44ch;
 }
 
 .actions {
@@ -91,11 +80,15 @@
   flex-wrap: wrap;
 }
 
+/* Cut-out art stands on its own light ground, the way apple.com/il stages a
+   hero. Every slide here uses a light ground, matching the shop's own site. */
 .art {
   aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
   padding: var(--space-4);
+  background: radial-gradient(65% 60% at 50% 45%, #ffffff, #e9e9ee);
+  border-radius: var(--radius-card);
 }
 
 .artShape {

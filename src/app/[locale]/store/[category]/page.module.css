@@ -50,3 +50,51 @@
   color: var(--text-secondary);
   padding-block: var(--space-8);
 }
+
+/* ---- Brand filter ---- */
+
+.brandFilters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-bottom: var(--space-5);
+}
+
+.brandLabel {
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-caption);
+  margin-inline-end: var(--space-2);
+}
+
+.brandChip {
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--separator);
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.brandChip:hover {
+  color: var(--text-primary);
+  border-color: var(--gray-quaternary);
+  text-decoration: none;
+}
+
+.brandChip[data-active='true'] {
+  background-color: var(--fill-blue);
+  border-color: var(--fill-blue);
+  color: #fff;
+}
+
+.count {
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}

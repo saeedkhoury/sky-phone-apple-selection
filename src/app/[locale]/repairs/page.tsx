@@ -47,7 +47,7 @@ export default async function RepairsPage({ params }: PageProps<'/[locale]/repai
 
       <section className="container section" aria-labelledby="services-heading">
         <h2 id="services-heading" className={styles.sectionTitle}>
-          {t('rp_list_head')}
+          {t('rp_services_head')}
         </h2>
         {/*
           No prices here by the owner's decision: the shop quotes after it has
@@ -71,14 +71,10 @@ export default async function RepairsPage({ params }: PageProps<'/[locale]/repai
             </li>
           ))}
         </ul>
-        <p className={styles.note}>{t('rp_note')}</p>
       </section>
 
-      <section className={styles.steps} aria-labelledby="steps-heading">
+      <section className={styles.steps}>
         <div className="container">
-          <h2 id="steps-heading" className={styles.sectionTitle}>
-            {t('pr_title')}
-          </h2>
           <ol className={styles.stepList}>
             {steps.map((step, index) => (
               <li key={step.h} className={styles.step}>

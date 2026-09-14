@@ -1,0 +1,94 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background-color: var(--bg-page);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.markWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 108px;
+}
+
+/* A slow sweep behind the mark, so the wait reads as deliberate rather than
+   as a spinner bolted on. */
+.halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--fill-blue) 90deg,
+    transparent 200deg
+  );
+  animation: sweep 1.5s linear infinite;
+  opacity: 0.75;
+}
+
+/* Masks the halo into a ring rather than a filled disc. */
+.halo::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background-color: var(--bg-page);
+}
+
+.mark {
+  position: relative;
+  border-radius: 20px;
+  animation: breathe 2.4s var(--ease-standard) infinite;
+}
+
+.name {
+  font-size: var(--fs-21);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--text-primary);
+}
+
+.tagline {
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-caption);
+  margin-top: -14px;
+}
+
+@keyframes sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Under reduced motion the loader still communicates waiting, but holds
+   still — the global reset zeroes the durations, so give it a visible ring. */
+@media (prefers-reduced-motion: reduce) {
+  .halo {
+    background: none;
+    border: 2px solid var(--separator);
+    border-top-color: var(--fill-blue);
+  }
+}

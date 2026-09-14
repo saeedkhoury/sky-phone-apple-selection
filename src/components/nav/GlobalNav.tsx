@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { categories } from '@/lib/catalog/categories'
@@ -57,15 +56,7 @@ export function GlobalNav() {
       <header ref={headerRef} className={styles.header} data-open={openMenu !== null}>
         <nav className={styles.bar} aria-label={t('nav_products')}>
           <Link href={`/${locale}`} className={styles.brand}>
-            <Image
-              src="/logo.png"
-              alt={SHOP.name}
-              width={30}
-              height={30}
-              className={styles.brandMark}
-              priority
-            />
-            <span className={styles.brandName}>{SHOP.name}</span>
+            {SHOP.name}
           </Link>
 
           <ul className={styles.list}>

@@ -96,6 +96,173 @@ test.describe('catalogue', () => {
   })
 })
 
+test.describe('brand filtering', () => {
+  test('the Apple section "All" link lands on Apple products only', async ({ page }) => {
+    await page.goto('/en')
+    // The section header's own action link, not a product tile inside it.
+    await page.locator('a[href="/en/store/all?brand=apple"]:visible').first().click()
+
+    await expect(page).toHaveURL(/brand=apple/)
+    // Wait for the filtered grid before reading it.
+    await expect(page.locator('h3').first()).toBeVisible()
+
+    // Every tile on the page must be an Apple product.
+    const names = await page.locator('h3').allInnerTexts()
+    expect(names.length).toBeGreaterThan(0)
+    expect(names.some((n) => /Galaxy|Xiaomi|Dell|PlayStation/i.test(n))).toBe(false)
+  })
+
+  test('the Samsung section has an "All" link that filters to Samsung', async ({ page }) => {
+    await page.goto('/en')
+    await page.locator('a[href="/en/store/all?brand=samsung"]:visible').first().click()
+
+    await expect(page).toHaveURL(/brand=samsung/)
+    await expect(page.locator('h3').first()).toBeVisible()
+
+    const names = await page.locator('h3').allInnerTexts()
+    expect(names.length).toBeGreaterThan(0)
+    expect(names.every((n) => /Galaxy/i.test(n))).toBe(true)
+  })
+
+  test('the gaming section link lands on the gaming category', async ({ page }) => {
+    await page.goto('/en')
+    await page.locator('a[href="/en/store/gaming"]:visible').first().click()
+    await expect(page).toHaveURL(/\/store\/gaming/)
+  })
+
+  test('the store page offers brand chips that filter the grid', async ({ page }) => {
+    await page.goto('/en/store/phones')
+    const before = await page.locator('h3').count()
+
+    // Scope to the brand filter: the footer links share these labels.
+    const brandNav = page.getByRole('navigation', { name: 'Brand' })
+    await brandNav.getByRole('link', { name: 'Apple', exact: true }).click()
+    await expect(page).toHaveURL(/brand=apple/)
+
+    const after = await page.locator('h3').count()
+    expect(after).toBeLessThan(before)
+    expect(after).toBeGreaterThan(0)
+  })
+
+  test('changing category keeps the active brand', async ({ page }) => {
+    await page.goto('/en/store/phones?brand=apple')
+    const categoryNav = page.getByRole('navigation', { name: 'Category' })
+    await categoryNav.getByRole('link', { name: 'Tablets', exact: true }).click()
+
+    await expect(page).toHaveURL(/\/store\/tablets\?brand=apple/)
+    await expect(page.locator('h3').first()).toBeVisible()
+
+    const names = await page.locator('h3').allInnerTexts()
+    expect(names.every((n) => /iPad/i.test(n))).toBe(true)
+  })
+
+  test('a brand chip is only offered when that brand has stock here', async ({ page }) => {
+    await page.goto('/en/store/computers')
+    // No Samsung computers in the catalogue, so no Samsung chip.
+    const brandNav = page.getByRole('navigation', { name: 'Brand' })
+    await expect(brandNav.getByRole('link', { name: 'Samsung', exact: true })).toHaveCount(0)
+    await expect(brandNav.getByRole('link', { name: 'Dell', exact: true })).toBeVisible()
+  })
+})
+
+test.describe('hero', () => {
+  test('shows all four of the shop’s ads, starting with iPhone Duo', async ({ page }) => {
+    await page.goto('/en')
+    const dots = page.getByRole('button', { name: /iPhone Duo|iPhone 18 Pro|PlayStation 5|Repairs/ })
+    await expect(dots).toHaveCount(4)
+
+    await expect(page.getByRole('heading', { name: 'iPhone Duo', level: 2 })).toBeVisible()
+  })
+
+  test('the repair slide uses the shop’s repair artwork', async ({ page }) => {
+    await page.goto('/en')
+    await page.getByRole('button', { name: 'Repairs', exact: true }).click()
+
+    const art = page.locator('section[aria-roledescription="carousel"] img')
+    await expect(art).toHaveAttribute('src', /repair-collage/)
+  })
+
+  test('every slide’s artwork actually decodes, not just resolves', async ({ page }) => {
+    await page.goto('/en')
+
+    // Asserting on the src alone would have missed a hero image that requested
+    // an oversized variant and never finished loading.
+    for (const name of ['iPhone Duo', 'iPhone 18 Pro', 'PlayStation 5', 'Repairs']) {
+      await page.getByRole('button', { name, exact: true }).click()
+      const art = page.locator('section[aria-roledescription="carousel"] img')
+
+      await expect
+        .poll(
+          async () =>
+            art.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0),
+          { timeout: 10_000, message: `hero artwork for ${name} never decoded` },
+        )
+        .toBe(true)
+    }
+  })
+
+  test('the iPhone Duo slide links through to Apple products', async ({ page }) => {
+    await page.goto('/en')
+    await expect(
+      page.getByRole('link', { name: 'Shop all iPhone models' }),
+    ).toHaveAttribute('href', /brand=apple/)
+  })
+})
+
+test.describe('hero typography', () => {
+  test('the headline uses the primary text colour, not the muted one', async ({ page }) => {
+    await page.goto('/en')
+
+    // A stale duplicate rule once made the whole copy column inherit the muted
+    // colour, so the headline rendered grey against the section headings.
+    const colours = await page.evaluate(() => {
+      const hero = document.querySelector('section[aria-roledescription="carousel"] h2')
+      const section = [...document.querySelectorAll('h2')].find((h) =>
+        h.textContent?.includes('Products'),
+      )
+      return {
+        hero: getComputedStyle(hero!).color,
+        section: getComputedStyle(section!).color,
+      }
+    })
+
+    expect(colours.hero).toBe(colours.section)
+  })
+})
+
+test.describe('navigation bar', () => {
+  test('shows the shop name as text, with no logo image', async ({ page }) => {
+    await page.goto('/en')
+    const header = page.locator('header')
+    await expect(header.getByRole('link', { name: 'Sky Phone' })).toBeVisible()
+    await expect(header.locator('img')).toHaveCount(0)
+  })
+
+  test('centres the page links between the name and the actions', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/en')
+
+    const viewport = 1440
+    const list = await page.locator('header nav ul').first().boundingBox()
+    const centre = list!.x + list!.width / 2
+
+    // Optically centred: within 40px of the viewport midpoint.
+    expect(Math.abs(centre - viewport / 2)).toBeLessThan(40)
+  })
+
+  test('offers all seven destinations', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/en')
+    const list = page.locator('header nav ul').first()
+
+    for (const label of ['Phones', 'Tablets', 'Computers', 'Gaming', 'Accessories']) {
+      await expect(list.getByRole('button', { name: label })).toBeVisible()
+    }
+    await expect(list.getByRole('link', { name: 'Repairs' })).toBeVisible()
+    await expect(list.getByRole('link', { name: 'About & Contact' })).toBeVisible()
+  })
+})
+
 test.describe('bag', () => {
   test('adds a product and orders it over WhatsApp', async ({ page }) => {
     await page.goto('/en/product/iphone-15-pro')
@@ -139,6 +306,16 @@ test.describe('repairs', () => {
       const body = await page.locator('body').innerText()
       // The owner asked for repairs without indicative pricing.
       expect(body).not.toContain('₪')
+    })
+
+    test(`does not talk about repair prices in ${locale}`, async ({ page }) => {
+      await page.goto(`/${locale}/repairs`)
+      // Showing no prices but still saying "prices are indicative" reads as a
+      // bug to the owner. Headings and notes must not reference pricing at all.
+      const main = await page.locator('main').innerText()
+      const priceWords =
+        /\bprices?\b|\bpricing\b|מחירים|המחירים|המחיר הסופי|الأسعار|السعر النهائي/i
+      expect(main).not.toMatch(priceWords)
     })
   }
 
@@ -234,6 +411,36 @@ test.describe('localisation of UI chrome', () => {
       }
     })
   }
+})
+
+test.describe('brand splash', () => {
+  test('shows the logo on first paint', async ({ page }) => {
+    await page.goto('/he', { waitUntil: 'commit' })
+    const splash = page.locator('div[class*="splash"]').first()
+    await expect(splash).toBeVisible()
+    await expect(splash.locator('img')).toHaveAttribute('src', /logo/)
+  })
+
+  test('clears itself and never blocks the page', async ({ page }) => {
+    await page.goto('/he')
+    await page.waitForTimeout(2000)
+
+    // A splash that failed to clear would cover the whole shop, so this is the
+    // assertion that matters: the centre of the page is real content.
+    const blocking = await page.evaluate(() => {
+      const el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)
+      return el?.className?.toString().includes('splash') ?? false
+    })
+    expect(blocking).toBe(false)
+  })
+
+  test('is hidden from assistive technology', async ({ page }) => {
+    await page.goto('/en', { waitUntil: 'commit' })
+    await expect(page.locator('div[class*="splash"]').first()).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    )
+  })
 })
 
 test.describe('responsive', () => {

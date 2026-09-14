@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { ProductTile } from '@/components/tiles/ProductTile'
 import { TileGrid } from '@/components/tiles/TileGrid'
 import { products } from '@/lib/catalog/products'
-import { categories } from '@/lib/catalog/categories'
-import { filterByCategory, sortProducts } from '@/lib/catalog/query'
+import { brands, categories } from '@/lib/catalog/categories'
+import { filterByBrand, filterByCategory, sortProducts } from '@/lib/catalog/query'
 import { LOCALES, isLocale, translate } from '@/lib/i18n/config'
 import { SHOP } from '@/lib/shop'
 import styles from './page.module.css'
@@ -25,20 +25,43 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/store/[c
   return { title: `${label} — ${SHOP.name}` }
 }
 
-export default async function CategoryPage({ params }: PageProps<'/[locale]/store/[category]'>) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: PageProps<'/[locale]/store/[category]'>) {
   const { locale, category } = await params
   if (!isLocale(locale)) notFound()
 
   const match = categories.find((entry) => entry.id === category)
   if (category !== 'all' && !match) notFound()
 
+  const resolved = await searchParams
+  const rawBrand = resolved.brand
+  const activeBrand = typeof rawBrand === 'string' ? rawBrand : 'all'
+
   const t = (key: string) => translate(locale, key)
-  const items = sortProducts(filterByCategory(products, category), 'featured')
+
+  const inCategory = filterByCategory(products, category)
+  const items = sortProducts(filterByBrand(inCategory, activeBrand), 'featured')
+
+  // Only offer brands that actually have stock in this category, so the filter
+  // row can never lead to an empty result.
+  const availableBrands = brands.filter((brand) =>
+    inCategory.some((product) => product.brand === brand.id),
+  )
+
+  function hrefFor(nextCategory: string, nextBrand: string): string {
+    const base = `/${locale}/store/${nextCategory}`
+    return nextBrand === 'all' ? base : `${base}?brand=${nextBrand}`
+  }
+
+  const activeBrandName = brands.find((brand) => brand.id === activeBrand)?.name
 
   return (
     <>
       <header className={`container ${styles.head}`}>
         <h1 className={styles.title}>
+          {activeBrandName ? `${activeBrandName} ` : ''}
           {match ? t(match.labelKey) : t('nav_products')}
         </h1>
         <p className={styles.tagline}>{t('pr_sub')}</p>
@@ -46,7 +69,7 @@ export default async function CategoryPage({ params }: PageProps<'/[locale]/stor
 
       <nav className={`container ${styles.filters}`} aria-label={t('filter_category')}>
         <Link
-          href={`/${locale}/store/all`}
+          href={hrefFor('all', activeBrand)}
           className={styles.chip}
           data-active={category === 'all'}
         >
@@ -55,7 +78,7 @@ export default async function CategoryPage({ params }: PageProps<'/[locale]/stor
         {categories.map((entry) => (
           <Link
             key={entry.id}
-            href={`/${locale}/store/${entry.id}`}
+            href={hrefFor(entry.id, activeBrand)}
             className={styles.chip}
             data-active={category === entry.id}
           >
@@ -64,7 +87,34 @@ export default async function CategoryPage({ params }: PageProps<'/[locale]/stor
         ))}
       </nav>
 
+      {availableBrands.length > 1 && (
+        <nav className={`container ${styles.brandFilters}`} aria-label={t('filter_brand')}>
+          <span className={styles.brandLabel}>{t('filter_brand')}</span>
+          <Link
+            href={hrefFor(category, 'all')}
+            className={styles.brandChip}
+            data-active={activeBrand === 'all'}
+          >
+            {t('filter_all')}
+          </Link>
+          {availableBrands.map((brand) => (
+            <Link
+              key={brand.id}
+              href={hrefFor(category, brand.id)}
+              className={styles.brandChip}
+              data-active={activeBrand === brand.id}
+            >
+              {brand.name}
+            </Link>
+          ))}
+        </nav>
+      )}
+
       <section className="container" style={{ paddingBottom: 'var(--space-10)' }}>
+        <p className={styles.count}>
+          {items.length} {t('nav_products')}
+        </p>
+
         {items.length === 0 ? (
           <p className={styles.empty}>{t('search_empty_p')}</p>
         ) : (
