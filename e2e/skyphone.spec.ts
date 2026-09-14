@@ -201,6 +201,45 @@ test.describe('hero', () => {
     }
   })
 
+  test('the portrait PS5 artwork fits completely inside its hero frame', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/en')
+    await page.getByRole('button', { name: 'PlayStation 5', exact: true }).click()
+
+    const layout = await page
+      .locator('section[aria-roledescription="carousel"]')
+      .evaluate((carousel) => {
+        const image = carousel.querySelector('img')
+        const frame = image?.parentElement
+        const art = frame?.parentElement
+
+        if (!image || !art) return null
+
+        const bounds = (element: Element) => {
+          const rect = element.getBoundingClientRect()
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+          }
+        }
+
+        return {
+          art: bounds(art),
+          image: bounds(image),
+          objectFit: getComputedStyle(image).objectFit,
+        }
+      })
+
+    expect(layout).not.toBeNull()
+    expect(layout!.objectFit).toBe('contain')
+    expect(layout!.image.top).toBeGreaterThanOrEqual(layout!.art.top)
+    expect(layout!.image.right).toBeLessThanOrEqual(layout!.art.right)
+    expect(layout!.image.bottom).toBeLessThanOrEqual(layout!.art.bottom)
+    expect(layout!.image.left).toBeGreaterThanOrEqual(layout!.art.left)
+  })
+
   test('the iPhone Duo slide links through to Apple products', async ({ page }) => {
     await page.goto('/en')
     await expect(

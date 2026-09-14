@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a reproducible problem in the storefront or its tooling.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the project. Do not include customer data,
+        credentials, order details, or other sensitive information. For a
+        security concern, follow SECURITY.md instead of opening this form.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, in one or two sentences?
+      placeholder: The product carousel crops the active image on desktop.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Give the smallest reliable sequence of steps.
+      placeholder: |
+        1. Open …
+        2. Select …
+        3. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+      placeholder: Expected …; actual …
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Storefront or catalogue
+        - Cart or order handoff
+        - Navigation or localisation
+        - Accessibility or responsive layout
+        - Build, test, or deployment tooling
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/device, operating system, locale, and approximate viewport if relevant.
+      placeholder: Chrome 131 on macOS, English locale, 1440 × 900
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed personal, payment, order, credential, and other sensitive data from this report.
+          required: true

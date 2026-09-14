@@ -1,108 +1,132 @@
-# Sky Phone
+# Sky Phone — Apple Selection
 
-A storefront for Sky Phone — a phone, tablet, computer and gaming shop with
-same-day repairs in Kafr Kanna, established 2010.
+Private, pre-launch source for Sky Phone's trilingual storefront. The project
+supports Hebrew, Arabic, and English shopping journeys for phones, tablets,
+computers, gaming, accessories, repairs, and WhatsApp sales enquiries.
 
-Trilingual (Hebrew, Arabic, English) with full right-to-left support, built on
-the visual language of `developer.apple.com`.
+> **Status:** production-preparation. This is not yet an owner-approved public
+> store or a payment/inventory system.
 
-## Getting started
+Repository: [saeedkhoury/sky-phone-apple-selection](https://github.com/saeedkhoury/sky-phone-apple-selection)
+(private until the owner approval gates are complete).
+
+## What is included
+
+- Next.js 16, React 19, TypeScript, and local deployable media assets.
+- Localized `/he`, `/ar`, and `/en` routes with correct right-to-left layout.
+- Product catalogue, category/brand filters, search, product variants, and a
+  browser-local shopping bag.
+- WhatsApp and telephone handoff for sales and repair enquiries; no simulated
+  payment checkout.
+- Accessible navigation, theme handling, carousel controls, security headers,
+  Vitest coverage, and Playwright Chromium journeys.
+
+## Start locally
+
+Requires Node.js 22.12 or later and npm 10.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Opens at http://localhost:3000, which redirects to the visitor's best language —
-Hebrew by default.
+Open [http://localhost:3000](http://localhost:3000). Bare paths redirect to the
+visitor's preferred supported language (Hebrew is the fallback).
 
-First E2E run also needs `npx playwright install chromium`.
+For the first browser-test run, install Chromium once:
 
-## Scripts
-
-| Command | What it does |
-|---|---|
-| `npm run dev` | Dev server |
-| `npm run build` | Production build (117 static pages) |
-| `npm test` | Unit + integration tests (Vitest) |
-| `npm run test:coverage` | Coverage, gated at 80% on `src/lib` |
-| `npm run test:e2e` | End-to-end journeys (Playwright) |
-| `npm run lint` | ESLint |
-
-## How it is put together
-
-```
-src/
-  app/[locale]/        every page, statically generated per language:
-                       home, store/[category], product/[slug], repairs,
-                       about, cart, search
-  middleware.ts        sends bare paths to a language
-  components/
-    nav/               blurred sticky nav, mega-menu, search, language switcher
-    footer/            multi-column footer, mobile accordions, theme toggle
-    hero/              hero carousel
-    tiles/             product tiles and the responsive grid
-    product/           detail view, colour and storage pickers, gallery
-    repairs/           services strip and line icons
-    reels/             the shop's own video clips
-    chat/              rule-based support assistant
-  lib/
-    catalog/           27 SKUs, categories, brands, search and filtering
-    cart/              pure immutable reducer + provider
-    repairs/           the seven services
-    chat/              intent matching
-    format/            currency (whole shekels)
-    i18n/              locale config + the HE/AR/EN message decks
-    theme/             external theme store
-public/img, public/video   product photography and shop clips
+```bash
+npx playwright install chromium
 ```
 
-### Decisions worth knowing
+## Quality commands
 
-- **Money is whole shekels.** The shop prices in round shekels, so there is no
-  minor unit to carry. There is deliberately **no tax line**: Israeli consumer
-  prices are VAT-inclusive by law, so the shelf price is the price paid.
-- **There is no card checkout.** The shop confirms orders over WhatsApp and
-  takes payment in store, so the bag composes a real order message rather than
-  simulating a payment it cannot process.
-- **Repairs carry no prices.** All seven services are listed and each routes to
-  a real quote. The owner asked for indicative pricing to be left off; tests
-  assert that no shekel sign appears on the repairs page in any language, and
-  that the assistant never quotes one. Do not reintroduce prices without asking
-  him — an indicative number becomes a promise in the customer's head.
-- **Language is a route, not state.** `/he`, `/ar`, `/en` each render on the
-  server with the right `lang` and `dir`, so every page is statically
-  generated per language and the switcher is a normal navigation.
-- **RTL uses logical CSS properties** (`inset-inline-*`, `margin-inline-*`,
-  `text-align: start`). A physical `left`/`right` is a layout bug in two of the
-  three languages.
-- **Theme lives outside React** in a module store read via
-  `useSyncExternalStore`, with a blocking inline script so there is no flash of
-  the wrong palette.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local development server. |
+| `npm run lint` | Run ESLint. |
+| `npm test` | Run unit and integration tests with Vitest. |
+| `npm run test:coverage` | Run the coverage gate for `src/lib`. |
+| `npm run build` | Produce and validate the production build. |
+| `npm run start` | Serve a completed production build. |
+| `npm run test:e2e` | Run Playwright Chromium customer journeys. |
 
-## Content and rights
+Run `npm run lint`, `npm test`, and `npm run build` for every change. Run the
+browser suite whenever a customer route, layout, catalog, hero, bag, or
+navigation flow changes.
 
-- Copy is the shop's own approved trilingual deck (285 keys × 3 languages) in
-  `src/lib/i18n/messages/`. Five interface strings (theme switcher labels and a
-  social label) were added for this build; everything else is carried over.
-- Shop details in `src/lib/shop.ts` were verified against the shop's public
-  Instagram. Do not replace them with placeholders.
-- **Product imagery is mixed provenance.** Most photos come from Wikimedia
-  Commons; some are official manufacturer imagery supplied by the shop owner.
-  Using manufacturer photography is normal practice for a retailer selling
-  those products, but it is not a licence — if a specific image is ever
-  challenged, swap it. Nothing here is presented as Sky Phone's own photography.
+## Project map
 
-## Known gaps
+```text
+src/app/[locale]/       Locale-aware pages: home, store, product, repairs,
+                         about, search, and bag
+src/components/         Reusable navigation, carousel, product, repair, reel,
+                         chat, footer, and UI components
+src/lib/catalog/        Typed products, categories, filtering, and search
+src/lib/i18n/           Hebrew, Arabic, and English message decks / RTL config
+src/lib/cart/           Immutable local-shopping-bag state
+src/lib/shop.ts         Business contact and WhatsApp-link helpers
+src/proxy.ts            Language routing for bare paths
+public/img/             Approved-in-progress product and campaign imagery
+public/video/           Store reel media and posters
+docs/                   Launch gates, operating workflow, and QA evidence
+```
 
-- **Opening hours are unconfirmed.** They were never published publicly and are
-  carried over from the previous site as a placeholder. Confirm them with the
-  owner before this goes live — they appear on the About page and in the
-  assistant.
-- **The iPhone 17 Pro / Pro Max images are synthetic mockups with blank
-  screens**, not photographs. Replacements were supplied at only 225×225, too
-  small for the gallery. These are the next images to replace.
-- E2E runs on Chromium only; there is no visual-regression baseline.
-- No backend: the catalogue is local typed data and the cart lives in
-  `localStorage`. Adding a product means editing
-  `src/lib/catalog/products.ts`.
+## Important commercial boundaries
+
+- **Prices:** catalog prices are whole ILS values and are maintained in source;
+  the store owner must approve every current price and availability statement.
+- **Orders:** the bag creates a WhatsApp enquiry. Staff must confirm stock,
+  final price, payment, collection/delivery, and warranty terms.
+- **Repairs:** the site routes to a quote; it intentionally does not publish
+  indicative repair prices.
+- **Catalog and content:** product data is local typed data. Changes belong in
+  `src/lib/catalog/` and the three translation files under `src/lib/i18n/`.
+- **RTL:** use CSS logical properties such as `margin-inline` and
+  `text-align: start`; hard-coded `left` and `right` create language bugs.
+
+## Production configuration
+
+Copy [`.env.example`](.env.example) to `.env.local` for local deployment
+configuration. Before a public launch, set the confirmed canonical domain:
+
+```text
+NEXT_PUBLIC_SITE_URL=https://www.your-confirmed-domain.example
+```
+
+Do not commit credentials, hosting tokens, domain-provider secrets, customer
+data, or supplier agreements. The default `skyphone.example` metadata URL is a
+pre-launch fallback only and must not remain on a public deployment.
+
+## Operating the project
+
+- [Operating workflow](docs/operating-workflow.md) defines roles, catalog
+  updates, review, QA, release, incident response, and access handoff.
+- [Owner approval and launch checklist](docs/owner-approval-and-launch.md)
+  records the commercial, asset-rights, legal, domain, and technical gates.
+- [Quality assurance guide](docs/testing/quality-assurance.md) describes the
+  automated coverage and the release verification record.
+
+The GitHub repository remains private until the store owner has approved the
+asset rights, customer promises, domain, policy copy, and launch decision.
+
+## Assets, ownership, and licensing
+
+This repository is private commercial source and is intentionally marked
+`UNLICENSED`. It contains the runtime images and videos needed for a complete
+project checkout and deploy preview. Those assets have mixed provenance (owner-supplied,
+manufacturer, Wikimedia, and synthetic/mockup material); repository access is
+not proof of a public-use licence. Keep a private asset register and obtain
+owner approval before public deployment or reuse.
+
+## Known pre-launch decisions
+
+- Confirm the real opening hours, product facts, policies, and support rota
+  with the owner.
+- Replace or explicitly approve the low-resolution synthetic iPhone 17 Pro and
+  iPhone 17 Pro Max imagery before public release.
+- Pick hosting, monitoring, analytics, legal/privacy copy, and the production
+  domain only after owner approval.
+- The Content Security Policy currently permits inline scripts to preserve
+  static rendering in the Next.js App Router. Record acceptance at launch and
+  reassess a nonce-based CSP if the project becomes dynamic.

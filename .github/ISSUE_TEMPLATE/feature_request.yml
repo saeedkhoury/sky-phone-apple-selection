@@ -1,0 +1,57 @@
+name: Feature request
+description: Propose an approved product or operational improvement.
+title: "feature: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep requests free of customer data, credentials, and confidential
+        commercial terms. Changes affecting real orders, prices, inventory,
+        payments, policies, or business contact details require owner approval.
+
+  - type: input
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What user or business need does this address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the desired experience, not only an implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable conditions that show the work is complete.
+      placeholder: |
+        - …
+        - …
+    validations:
+      required: true
+
+  - type: dropdown
+    id: approval
+    attributes:
+      label: Owner approval status
+      options:
+        - Not yet requested
+        - Requested; awaiting decision
+        - Approved for discovery only
+        - Approved for implementation
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Include mockups, links, constraints, or dependencies if they are safe to share.

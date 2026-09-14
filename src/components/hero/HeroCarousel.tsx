@@ -109,18 +109,19 @@ export function HeroCarousel({ slides }: { slides: readonly HeroSlide[] }) {
         </div>
 
         <div className={styles.art}>
-          {/* No `sizes` here: the art renders at a fixed box, and supplying a
-              sizes hint made the browser request a 3840px variant of a 1100px
-              source, which the optimiser was still building when the slide had
-              already changed. Width-based srcset is correct for fixed art. */}
-          <Image
-            src={slide.image}
-            alt={slide.alt}
-            width={620}
-            height={620}
-            className={styles.artImage}
-            priority={index <= 1}
-          />
+          <div className={styles.artFrame}>
+            {/* A fill image is bounded by the visible art frame. This keeps
+                portrait assets, such as the PS5, fully visible rather than
+                letting their intrinsic height overflow the frame. */}
+            <Image
+              src={slide.image}
+              alt={slide.alt}
+              fill
+              sizes="(max-width: 833px) 100vw, 50vw"
+              className={styles.artImage}
+              priority={index <= 1}
+            />
+          </div>
         </div>
       </div>
 

@@ -1,7 +1,13 @@
 {
-  "name": "skyphone-store",
+  "name": "sky-phone-apple-selection",
   "version": "0.1.0",
+  "description": "Private pre-launch storefront for Sky Phone — Apple Selection.",
   "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "npm@10.9.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -54,6 +54,13 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // This project is nested below another npm lockfile on the developer
+  // machine. Pin Turbopack to this repository so local and CI builds resolve
+  // this package-lock.json rather than walking into the parent workspace.
+  turbopack: {
+    root: __dirname,
+  },
+
   images: {
     /**
      * The catalogue is ~330 pre-sized local files (many already WebP) served

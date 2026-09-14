@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -44,8 +45,9 @@ next-env.d.ts
 /coverage
 /test-results
 /playwright-report
+/artifacts/visual
 
-# Large binary assets copied from the Sky Phone site. They live in public/ and
-# are required to run, but do not belong in this demo repo's history.
-/public/img/
-/public/video/
+# Product imagery and shop reels are source assets for this private project.
+# Keep them in version control so a clean clone or deployment renders the
+# catalogue, hero carousel, and video row correctly. Asset-rights approval is
+# tracked in docs/owner-approval-and-launch.md before any public release.

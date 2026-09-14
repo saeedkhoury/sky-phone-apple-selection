@@ -51,7 +51,13 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   // suppressHydrationWarning covers this element's own attributes: the theme
   // script below rewrites data-theme before React hydrates.
   return (
-    <html lang={LOCALE_TAGS[locale]} dir={dir} data-theme="dark" suppressHydrationWarning>
+    <html
+      lang={LOCALE_TAGS[locale]}
+      dir={dir}
+      data-theme="dark"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
