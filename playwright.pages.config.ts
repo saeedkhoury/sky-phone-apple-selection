@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const publishedUrl = process.env.PAGES_TEST_URL
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/sky-phone-apple-selection'
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/skyphone-ca'
 
 export default defineConfig({
   testDir: './e2e',

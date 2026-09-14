@@ -1,6 +1,6 @@
 # Sky Phone — Apple Selection
 
-**[Open the Sky Phone website](https://saeedkhoury.github.io/sky-phone-apple-selection/en/)**
+**[Open the Sky Phone website](https://saeedkhoury.github.io/skyphone-ca/)**
 
 Public preview and source for Sky Phone's trilingual storefront. The project
 supports Hebrew, Arabic, and English shopping journeys for phones, tablets,
@@ -9,16 +9,16 @@ computers, gaming, accessories, repairs, and WhatsApp sales enquiries.
 > **Status:** public review preview, pending the store owner's commercial launch
 > approval. The bag creates WhatsApp enquiries; there is no payment/inventory backend.
 
-Repository: [saeedkhoury/sky-phone-apple-selection](https://github.com/saeedkhoury/sky-phone-apple-selection)
+Repository: [saeedkhoury/skyphone-ca](https://github.com/saeedkhoury/skyphone-ca)
 
 The `github.io` link above opens the website. The `github.com` repository link
 opens the source code and this README.
 
 ## Published website
 
-- [English](https://saeedkhoury.github.io/sky-phone-apple-selection/en/)
-- [עברית](https://saeedkhoury.github.io/sky-phone-apple-selection/he/)
-- [العربية](https://saeedkhoury.github.io/sky-phone-apple-selection/ar/)
+- [English](https://saeedkhoury.github.io/skyphone-ca/en/)
+- [עברית](https://saeedkhoury.github.io/skyphone-ca/he/)
+- [العربية](https://saeedkhoury.github.io/skyphone-ca/ar/)
 
 GitHub Pages publishes the built storefront after the **Publish storefront**
 workflow succeeds on `main`. Images, videos, search, brand filters, language

@@ -1,9 +1,9 @@
 import { spawnSync } from 'node:child_process'
 import { writeFile } from 'node:fs/promises'
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/sky-phone-apple-selection'
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/skyphone-ca'
 if (!/^\/[a-zA-Z0-9_-]+$/.test(basePath)) {
-  throw new Error('NEXT_PUBLIC_BASE_PATH must be a single repository path, such as /sky-phone-apple-selection')
+  throw new Error('NEXT_PUBLIC_BASE_PATH must be a single repository path, such as /skyphone-ca')
 }
 
 const result = spawnSync(process.execPath, ['node_modules/next/dist/bin/next', 'build'], {

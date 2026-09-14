@@ -2,9 +2,9 @@
 
 The public review website is hosted on **GitHub Pages**:
 
-**https://saeedkhoury.github.io/sky-phone-apple-selection/en/**
+**https://saeedkhoury.github.io/skyphone-ca/**
 
-The repository at `github.com/saeedkhoury/sky-phone-apple-selection` contains
+The repository at `github.com/saeedkhoury/skyphone-ca` contains
 source and documentation. It is a different address from the website. The
 repository's About website field and the first README link point to the site.
 
@@ -28,7 +28,7 @@ npm run build:pages
 npm run test:pages
 ```
 
-The export test server mounts `out/` beneath `/sky-phone-apple-selection/`, just
+The export test server mounts `out/` beneath `/skyphone-ca/`, just
 like GitHub Pages, and checks real images, videos, styles, direct routes,
 brand filters, search, language switching, and bag persistence. For manual review:
 
@@ -36,12 +36,12 @@ brand filters, search, language switching, and bag persistence. For manual revie
 node scripts/serve-pages.mjs
 ```
 
-Open `http://127.0.0.1:4173/sky-phone-apple-selection/en/`.
+Open `http://127.0.0.1:4173/skyphone-ca/en/`.
 
 To verify the deployed site with the same browser checks:
 
 ```bash
-PAGES_TEST_URL=https://saeedkhoury.github.io/sky-phone-apple-selection npm run test:pages
+PAGES_TEST_URL=https://saeedkhoury.github.io/skyphone-ca npm run test:pages
 ```
 
 ## Hosting behavior

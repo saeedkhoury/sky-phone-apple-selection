@@ -4,7 +4,7 @@ import { stat } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
 
 const root = resolve('out')
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/sky-phone-apple-selection'
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/skyphone-ca'
 const port = Number(process.env.PORT ?? 4173)
 const types = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript',
