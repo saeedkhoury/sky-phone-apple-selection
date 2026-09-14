@@ -259,14 +259,15 @@
 @media (max-width: 833px) {
   .bar {
     height: var(--nav-height-compact);
-    gap: var(--space-4);
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
   }
 
   .brand {
     /* Keep the full mark legible beside the three navigation actions on
        compact handsets, rather than allowing it to crowd or wrap. */
-    font-size: 16px;
-    letter-spacing: 0.19em;
+    font-size: clamp(14px, 4vw, 16px);
+    letter-spacing: 0.15em;
   }
 
   .scrim {
@@ -318,12 +319,26 @@
   text-decoration: none;
 }
 
-@media (max-width: 833px) {
+@media (max-width: 1068px) {
   .menuButton {
     display: inline-flex;
   }
 
   .mobilePanel[data-open='true'] {
     display: block;
+  }
+}
+
+@media (max-width: 833px) {
+  .actions {
+    gap: 0;
+  }
+
+  .menuButton,
+  .iconButton {
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
   }
 }

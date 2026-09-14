@@ -35,11 +35,14 @@
   align-items: center;
   gap: var(--space-3);
   flex: 1;
+  min-width: 0;
   color: var(--text-secondary);
 }
 
 .input {
   flex: 1;
+  min-width: 0;
+  width: 100%;
   appearance: none;
   background: none;
   border: 0;
@@ -63,6 +66,10 @@
   color: var(--text-secondary);
   padding: var(--space-2);
   display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
   transition: color var(--duration-fast) var(--ease-standard);
 }
 

@@ -8,7 +8,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',
   use: { baseURL: 'http://localhost:3000', trace: 'on-first-retry' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile-webkit', testMatch: 'mobile-interactions.spec.ts', use: { ...devices['iPhone 13'] } },
+  ],
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',

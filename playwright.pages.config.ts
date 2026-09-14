@@ -5,7 +5,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/skyphone-ca'
 
 export default defineConfig({
   testDir: './e2e',
-  testMatch: ['pages.spec.ts', 'hero-loop.spec.ts', 'catalog-ordering.spec.ts'],
+  testMatch: ['pages.spec.ts', 'hero-loop.spec.ts', 'catalog-ordering.spec.ts', 'mobile-interactions.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -15,6 +15,10 @@ export default defineConfig({
     baseURL: `${(publishedUrl ?? `http://127.0.0.1:4173${basePath}`).replace(/\/$/, '')}/`,
     trace: 'retain-on-failure',
   },
+  projects: [
+    { name: 'chromium' },
+    { name: 'mobile-webkit', testMatch: 'mobile-interactions.spec.ts', use: { ...devices['iPhone 13'] } },
+  ],
   webServer: publishedUrl ? undefined : {
     command: 'node scripts/serve-pages.mjs',
     url: `http://127.0.0.1:4173${basePath}/`,

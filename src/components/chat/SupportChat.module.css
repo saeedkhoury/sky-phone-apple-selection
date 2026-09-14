@@ -1,7 +1,7 @@
-.launcher {
+.launcher,
+.whatsapp {
   position: fixed;
-  bottom: var(--space-5);
-  inset-inline-end: var(--space-5);
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   z-index: 150;
   width: 48px;
   height: 48px;
@@ -16,17 +16,28 @@
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 
-.launcher:hover {
+.launcher {
+  inset-inline-end: max(var(--space-5), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+}
+
+.whatsapp {
+  inset-inline-start: max(var(--space-5), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  background-color: #128c46;
+}
+
+.launcher:hover,
+.whatsapp:hover {
   transform: translateY(-2px);
 }
 
 .panel {
   position: fixed;
-  bottom: calc(var(--space-5) + 60px);
+  bottom: calc(var(--space-5) + 60px + env(safe-area-inset-bottom, 0px));
   inset-inline-end: var(--space-5);
   z-index: 150;
   width: min(370px, calc(100vw - var(--space-6)));
   max-height: min(560px, calc(100vh - 140px));
+  max-height: min(560px, calc(100dvh - 140px - env(safe-area-inset-bottom, 0px)));
   display: flex;
   flex-direction: column;
   background-color: var(--bg-elevated);
@@ -235,8 +246,13 @@
     width: auto;
   }
 
-  .launcher {
-    bottom: var(--space-4);
-    inset-inline-end: var(--space-4);
+  .launcher,
+  .whatsapp {
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .input {
+    /* Prevent iOS focus zoom from pushing the dialog controls off screen. */
+    font-size: 16px;
   }
 }

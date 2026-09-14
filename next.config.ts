@@ -36,7 +36,9 @@ const contentSecurityPolicy = [
   `base-uri 'self'`,
   `form-action 'self'`,
   `frame-ancestors 'none'`,
-  `upgrade-insecure-requests`,
+  // Safari upgrades localhost assets to HTTPS too; the dev server is HTTP.
+  // Keep HTTPS enforcement in production without breaking local hydration.
+  ...(isDev ? [] : ['upgrade-insecure-requests']),
 ].join('; ')
 
 const securityHeaders = [
@@ -55,6 +57,9 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // The bottom-corner developer badge otherwise covers the floating contact
+  // buttons during localhost mobile reviews. Runtime errors still surface.
+  devIndicators: false,
   ...(isStaticExport ? { output: 'export' as const, trailingSlash: true } : {}),
   basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
   // This project is nested below another npm lockfile on the developer

@@ -97,32 +97,34 @@ for (const locale of ['en', 'he', 'ar']) {
 test.describe('touchscreen', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
 
-  test('mobile swiping wraps both ways and resumes autoplay', async ({ page }) => {
-    await openHero(page)
-    const hero = page.locator(heroSelector)
-    const image = hero.locator('[data-hero-active="true"] img')
-    const touch = await page.context().newCDPSession(page)
+  for (const locale of ['en', 'he', 'ar']) {
+    test(`mobile swiping wraps both ways and resumes autoplay in ${locale}`, async ({ page }) => {
+      await openHero(page, locale)
+      const hero = page.locator(heroSelector)
+      const image = hero.locator('[data-hero-active="true"] img')
+      const touch = await page.context().newCDPSession(page)
 
-    async function drag(fromX: number, toX: number) {
-      const box = (await image.boundingBox())!
-      const y = box.y + box.height / 2
-      await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fromX, y }] })
-      for (let step = 1; step <= 20; step++) {
-        await touch.send('Input.dispatchTouchEvent', {
-          type: 'touchMove', touchPoints: [{ x: fromX + (toX - fromX) * step / 20, y }],
-        })
+      async function drag(fromX: number, toX: number) {
+        const box = (await image.boundingBox())!
+        const y = box.y + box.height / 2
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fromX, y }] })
+        for (let step = 1; step <= 20; step++) {
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchMove', touchPoints: [{ x: fromX + (toX - fromX) * step / 20, y }],
+          })
+        }
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
       }
-      await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    }
 
-    await image.hover()
-    await drag(80, 310)
-    await expectSlide(page, 3)
-    await drag(310, 80)
-    await expectSlide(page, 0)
-    await expect(hero.getByRole('button', { name: 'Pause slideshow' })).toHaveAttribute('aria-pressed', 'false')
-    await expect(hero.locator('[data-hero-active="true"]')).toHaveAttribute('aria-label', '2 / 4', { timeout: 10_000 })
-    await expectSlide(page, 1)
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  })
+      await image.hover()
+      await drag(locale === 'en' ? 80 : 310, locale === 'en' ? 310 : 80)
+      await expectSlide(page, 3)
+      await drag(locale === 'en' ? 310 : 80, locale === 'en' ? 80 : 310)
+      await expectSlide(page, 0)
+      await expect(hero.locator('button[aria-pressed]')).toHaveAttribute('aria-pressed', 'false')
+      await expect(hero.locator('[data-hero-active="true"]')).toHaveAttribute('aria-label', '2 / 4', { timeout: 10_000 })
+      await expectSlide(page, 1)
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+    })
+  }
 })

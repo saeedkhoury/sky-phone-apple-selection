@@ -1,7 +1,7 @@
 /*
- * First-paint splash. Deliberately CSS-only: a JS-driven overlay that fails to
- * unmount would cover the whole shop, so this can never get stuck — the
- * animation always ends hidden, whether or not any script runs.
+ * Decorative first-paint splash. Never intercept input, even if a browser
+ * keeps the transparent animation layer alive. Hidden is the underlying
+ * state, so disabling animations also reveals the shop without JavaScript.
  */
 .splash {
   position: fixed;
@@ -10,7 +10,10 @@
   display: grid;
   place-items: center;
   background-color: var(--bg-page);
-  animation: splash-out 0.45s var(--ease-standard) 1.05s forwards;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  animation: splash-out 0.45s var(--ease-standard) 1.05s backwards;
 }
 
 .stack {
@@ -72,6 +75,10 @@
 }
 
 @keyframes splash-out {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
   to {
     opacity: 0;
     visibility: hidden;
@@ -95,9 +102,12 @@
   }
 }
 
-/* The global reduced-motion reset zeroes these durations, so the splash lands
-   on its end state (hidden) almost immediately, which is the right behaviour. */
+/* Skip the decorative delay entirely when reduced motion is requested. */
 @media (prefers-reduced-motion: reduce) {
+  .splash {
+    animation: none;
+  }
+
   .halo {
     background: none;
     border: 2px solid var(--separator);

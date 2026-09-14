@@ -36,8 +36,10 @@ navigation, and the browser-local bag are included. See the
   [catalog ordering guide](docs/catalog-ordering.md) when adding products.
 - WhatsApp and telephone handoff for sales and repair enquiries; no simulated
   payment checkout.
+- Separate floating WhatsApp and chat-bubble buttons, with mobile safe-area
+  spacing and localized support handoff.
 - Accessible navigation, theme handling, carousel controls, security headers,
-  Vitest coverage, and Playwright Chromium journeys.
+  Vitest coverage, and Playwright Chromium/mobile WebKit journeys.
 - Continuously looping hero blocks: horizontal scrolling and dragging in both
   directions, automatic seven-second holds, and an explicit pause/resume control.
   Manual navigation keeps autoplay enabled; reduced-motion mode removes the

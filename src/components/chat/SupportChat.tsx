@@ -108,12 +108,24 @@ export function SupportChat() {
 
   return (
     <>
+      <a
+        className={styles.whatsapp}
+        href={whatsappLink(t('wa_contact_head'))}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t('chat_act_wa')}
+        title={t('chat_act_wa')}
+        data-contact="whatsapp"
+      >
+        <WhatsAppGlyph />
+      </a>
       <button
         ref={triggerRef}
         type="button"
         className={styles.launcher}
         aria-expanded={isOpen}
         aria-controls="support-chat"
+        title={t('chat_title')}
         onClick={() => setIsOpen((open) => !open)}
       >
         {isOpen ? <CloseIcon /> : <ChatGlyph />}
@@ -220,13 +232,33 @@ export function SupportChat() {
 
 function ChatGlyph() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M21 12a8 8 0 1 1-3.2-6.4M21 4v5h-5"
+        d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5a9.5 9.5 0 0 1 19 0Z"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+      <circle cx="7.5" cy="11.5" r="1" fill="currentColor" />
+      <circle cx="11.5" cy="11.5" r="1" fill="currentColor" />
+      <circle cx="15.5" cy="11.5" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
+function WhatsAppGlyph() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M20.5 11.8a8.5 8.5 0 0 1-12.7 7.4L3 20.5l1.3-4.6a8.5 8.5 0 1 1 16.2-4.1Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m8.1 7.4 1.2-.2 1.1 2.6-.9 1.1a7.1 7.1 0 0 0 3.5 3.1l1-1 2.5 1.2-.1 1.2c-.1 1-1.1 1.5-2.1 1.3-4.4-.9-7.3-3.8-7.6-7.3-.1-.9.5-1.7 1.4-2Z"
+        fill="currentColor"
       />
     </svg>
   )
