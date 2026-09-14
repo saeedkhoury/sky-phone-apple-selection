@@ -393,3 +393,43 @@ test.describe('accessibility', () => {
     await expect(scrim).toHaveAttribute('tabindex', '-1')
   })
 })
+
+test.describe('light theme', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('radio', { name: 'Light', exact: true }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  })
+
+  test('category tile titles stay legible against their dark gradients', async ({ page }) => {
+    // These tiles keep a dark background in both themes, so their text must not
+    // follow --text-primary, which is near-black in the light theme.
+    const luminance = await page.evaluate(() => {
+      const title = [...document.querySelectorAll('h3')].find(
+        (heading) => heading.textContent === 'Laptops',
+      )
+      if (!title) return null
+      const [r, g, b] = getComputedStyle(title)
+        .color.match(/\d+/g)!
+        .map(Number)
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    })
+
+    expect(luminance).not.toBeNull()
+    expect(luminance!).toBeGreaterThan(180)
+  })
+
+  test('loads with no console errors in either theme', async ({ page }) => {
+    const errors: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(message.text())
+    })
+    page.on('pageerror', (error) => errors.push(error.message))
+
+    await page.reload()
+    await page.goto('/store/laptops')
+    await page.goto('/product/vertex-pro')
+
+    expect(errors).toEqual([])
+  })
+})

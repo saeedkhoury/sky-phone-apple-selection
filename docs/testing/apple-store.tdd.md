@@ -107,21 +107,70 @@ imagery is generated SVG (`src/components/product/ProductArt.tsx`).
 | 22 | Every category is reachable from the mobile hamburger | `e2e/store.spec.ts` | e2e | PASS |
 | 23 | No horizontal overflow at 1440 / 1068 / 833 / 390px | `e2e/store.spec.ts` | e2e | PASS |
 
+## 4b. Review round
+
+Three specialist reviews ran against the finished build. Every CRITICAL and HIGH
+finding was fixed, and each fix is locked by a regression test rather than
+asserted — the tests below were written to fail against the pre-fix code.
+
+| Finding | Severity | Fix | Regression test |
+|---|---|---|---|
+| Carousel could not be stopped (WCAG 2.2.2) | CRITICAL | Persistent stop control; stays stopped; dots stop rotation | `the carousel can be stopped and stays stopped`, `choosing a slide by hand stops the rotation` |
+| `aria-live` wrapped the whole rotating slide | CRITICAL | Reduced to a text-only "Slide N of M" status | — (structural) |
+| Search dialog had no focus trap or focus restore | CRITICAL | Tab cycle implemented; focus returns to the trigger | `the search dialog traps Tab and restores focus on close` |
+| Skip link never became visible on focus | CRITICAL | Dedicated `.skip-link` with a `:focus` rule | `the skip link becomes visible when focused and jumps to main` |
+| Home `h1` was the rotating product name | HIGH | Stable `h1`; slide heading demoted to `h2` | `the page has exactly one h1 and it does not change on its own` |
+| Checkout left focus on submit after failure | HIGH | Focus moves to the first invalid field | `a failed checkout moves focus to the first invalid field`, `focus lands on the first field that is actually invalid` |
+| Theme toggle used `aria-pressed` for a single choice | MEDIUM | `radiogroup` with roving tabindex and arrow keys | `the theme control is a radio group operable with arrow keys` |
+| Reduced motion did not reach the JS-timer carousel | MEDIUM | `useReducedMotion` hook consulted before rotating | `reduced motion stops the carousel advancing on its own` |
+| `role="img"` contradicted `aria-hidden` on artwork | MEDIUM | Dropped `role="img"`, added `focusable="false"` | — (structural) |
+| Viewport-sized scrim was focusable | MEDIUM | `tabIndex={-1}` + `aria-hidden` | `the flyout scrim is not a keyboard focus target` |
+| **Real hydration mismatch on `<html data-theme>`** | HIGH | `suppressHydrationWarning` on the element the theme script mutates | `hydrating with a stored non-default theme logs no React errors` |
+| `ProductDetail` imported the product route's CSS module | HIGH | Colocated as `ProductDetail.module.css` | — (structural; build verifies) |
+| No CSP or security headers | MEDIUM | Headers added and verified against a production server | `serves a CSP and the standard hardening headers`, `the CSP does not block the inline theme script` |
+| Restored cart lines unbounded in price and count | MEDIUM | `MAX_UNIT_PRICE` and `MAX_CART_LINES` enforced on `HYDRATE` | 4 cases in `reducer.test.ts` |
+
+Two further defects were found by screenshotting the **light** theme, which the
+earlier dark-only review had not exercised:
+
+| Defect | Severity | Fix | Regression test |
+|---|---|---|---|
+| Category tile titles were invisible in light mode — the tiles keep a dark gradient but the text followed `--text-primary`, which goes near-black | HIGH | Text pinned light on those tiles in both themes | `category tile titles stay legible against their dark gradients` |
+| The new CSP broke React's dev build, which needs `eval()` | HIGH | `'unsafe-eval'` and websockets allowed in development only | `loads with no console errors in either theme` |
+
+Two findings were investigated and **not** fixed as proposed, with reasons:
+
+- **Hash-based CSP for `script-src`.** The theme script is static and hashes
+  correctly, but Next's App Router streams its hydration payload through inline
+  `self.__next_f.push(...)` scripts whose content differs per page and cannot be
+  hashed at config time. Verified by serving a production build and reading the
+  blocked-hash list. The strict alternative is a per-request nonce via
+  middleware, which opts every route into dynamic rendering — a real cost for a
+  store that is almost entirely statically generated. The shipped CSP therefore
+  allows `'unsafe-inline'` for scripts only, keeps every other directive strict,
+  and documents the tradeoff in `next.config.ts` for a deliberate decision later.
+- **Nav flyout focus movement on open.** Left as-is. The flyout opens on click
+  from a trigger that remains focused, Escape closes it, and focus-out dismisses
+  it. Moving focus into the panel on open would be the right call if it were a
+  menu widget; as a disclosure it is defensible. Noted rather than silently
+  dropped.
+
 ## 5. Coverage
 
 `npm run test:coverage`, thresholds set at 80% in `vitest.config.mts`:
 
 ```
 File            | % Stmts | % Branch | % Funcs | % Lines
-All files       |    96.1 |    94.18 |   98.11 |   96.21
- cart           |   95.55 |    91.89 |     100 |   97.29
+All files       |   95.75 |    94.25 |   96.55 |    95.8
+ cart           |   95.74 |     92.1 |     100 |    97.5
  catalog        |     100 |      100 |     100 |     100
  checkout       |     100 |      100 |     100 |     100
  format         |     100 |      100 |     100 |     100
+ hooks          |   88.88 |      100 |      80 |    87.5
  theme          |    82.6 |       50 |    87.5 |   80.95
 ```
 
-Totals: **103 unit/integration tests, 22 E2E journeys.**
+Totals: **111 unit/integration tests, 38 E2E journeys.**
 
 ### Known gaps
 

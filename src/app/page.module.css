@@ -6,7 +6,10 @@
   padding: var(--space-5);
   border-radius: var(--radius-card);
   border: 1px solid var(--separator);
-  color: var(--text-primary);
+  /* These tiles keep a dark gradient in both themes, so their text is pinned
+     light rather than following --text-primary, which goes near-black in the
+     light theme and renders the titles invisible. */
+  color: #f5f5f7;
   transition:
     transform var(--duration-medium) var(--ease-standard),
     border-color var(--duration-medium) var(--ease-standard);
@@ -26,7 +29,7 @@
 
 .categoryTagline {
   font-size: var(--fs-14);
-  color: var(--text-secondary);
+  color: rgba(245, 245, 247, 0.72);
   margin-top: 4px;
   /* Two lines max, so titles align across tiles of differing copy length. */
   display: -webkit-box;

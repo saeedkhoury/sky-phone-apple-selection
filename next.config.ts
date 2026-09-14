@@ -18,13 +18,19 @@ import type { NextConfig } from 'next'
  * Everything else below is unconditionally worth having, and the non-script
  * directives still bound what an injected script could reach.
  */
+/**
+ * React's development build uses eval() for debugging features, and the dev
+ * server needs a websocket for HMR. Production gets neither.
+ */
+const isDev = process.env.NODE_ENV === 'development'
+
 const contentSecurityPolicy = [
   `default-src 'self'`,
-  `script-src 'self' 'unsafe-inline'`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   `style-src 'self' 'unsafe-inline'`,
   `img-src 'self' data: blob:`,
   `font-src 'self'`,
-  `connect-src 'self'`,
+  `connect-src 'self'${isDev ? ' ws: wss:' : ''}`,
   `object-src 'none'`,
   `base-uri 'self'`,
   `form-action 'self'`,
