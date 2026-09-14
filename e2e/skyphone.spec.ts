@@ -193,6 +193,49 @@ test.describe('support chat', () => {
   })
 })
 
+test.describe('chat accessibility', () => {
+  test('opening the chat moves focus into it and Escape restores it', async ({ page }) => {
+    await page.goto('/en')
+    const trigger = page.getByRole('button', { name: 'Sky Phone chat' })
+    await trigger.click()
+
+    await expect(page.getByLabel(/Type a question/i)).toBeFocused()
+
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: 'Sky Phone chat' })).toBeHidden()
+    await expect(trigger).toBeFocused()
+  })
+
+  test('Tab stays inside the open chat panel', async ({ page }) => {
+    await page.goto('/en')
+    await page.getByRole('button', { name: 'Sky Phone chat' }).click()
+
+    const panel = page.getByRole('dialog', { name: 'Sky Phone chat' })
+    for (let i = 0; i < 12; i += 1) {
+      await page.keyboard.press('Tab')
+      const inside = await panel.evaluate((node) => node.contains(document.activeElement))
+      expect(inside).toBe(true)
+    }
+  })
+})
+
+test.describe('localisation of UI chrome', () => {
+  for (const locale of LOCALES) {
+    test(`the theme switcher is translated in ${locale}`, async ({ page }) => {
+      await page.goto(`/${locale}`)
+      const group = page.getByRole('radiogroup')
+      const text = await group.innerText()
+
+      if (locale === 'en') {
+        expect(text).toContain('Light')
+      } else {
+        // A Hebrew or Arabic visitor should not meet Latin UI chrome.
+        expect(text).not.toMatch(/Light|Dark|Auto/)
+      }
+    })
+  }
+})
+
 test.describe('responsive', () => {
   for (const [label, width] of [
     ['desktop', 1440],

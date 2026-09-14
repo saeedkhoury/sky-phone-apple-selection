@@ -9,7 +9,8 @@ export const SHOP = {
   phone: '052-722-3916',
   /** International form, for tel: and wa.me links. */
   phoneE164: '972527223916',
-  address: 'Kafr Kanna, Main Street',
+  /** Full verified form, matching the shop's own records. */
+  address: 'Kafr Kanna, Main Street (Wadi al-Hai road)',
   instagram: 'https://instagram.com/skyphone.ca',
   instagramHandle: '@skyphone.ca',
   instagramFollowers: '54.2K',

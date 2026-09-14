@@ -10,10 +10,10 @@ import { SHOP, mapsLink, telLink, whatsappLink } from '@/lib/shop'
 import { ChevronIcon } from '../nav/NavIcons'
 import styles from './GlobalFooter.module.css'
 
-const THEME_OPTIONS: readonly { value: Theme; label: string }[] = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'auto', label: 'Auto' },
+const THEME_OPTIONS: readonly { value: Theme; labelKey: string }[] = [
+  { value: 'light', labelKey: 'theme_light' },
+  { value: 'dark', labelKey: 'theme_dark' },
+  { value: 'auto', labelKey: 'theme_auto' },
 ]
 
 export function GlobalFooter() {
@@ -146,7 +146,7 @@ export function GlobalFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Facebook
+                {t('social_facebook')}
               </a>
             </div>
           </div>
@@ -165,7 +165,7 @@ export function GlobalFooter() {
           <div
             className={styles.themeToggle}
             role="radiogroup"
-            aria-label="Theme"
+            aria-label={t('theme_label')}
             onKeyDown={onThemeKeyDown}
           >
             {THEME_OPTIONS.map((option) => (
@@ -178,7 +178,7 @@ export function GlobalFooter() {
                 tabIndex={theme === option.value ? 0 : -1}
                 onClick={() => setTheme(option.value)}
               >
-                {option.label}
+                {t(option.labelKey)}
               </button>
             ))}
           </div>

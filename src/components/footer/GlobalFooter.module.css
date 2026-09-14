@@ -114,7 +114,7 @@
     color: var(--text-primary);
     font-size: var(--fs-12);
     font-weight: 600;
-    text-align: left;
+    text-align: start;
   }
 
   .accordionToggle svg {

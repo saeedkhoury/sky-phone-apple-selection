@@ -19,6 +19,9 @@ interface Message {
 
 const CHIPS = ['chat_chip_price', 'chat_chip_repair', 'chat_chip_hours', 'chat_chip_delivery']
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 export function SupportChat() {
   const { locale, t } = useLocale()
   const [isOpen, setIsOpen] = useState(false)
@@ -27,6 +30,7 @@ export function SupportChat() {
   const nextId = useRef(0)
   const logRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
   // Greet on first open, in the active language.
@@ -39,14 +43,42 @@ export function SupportChat() {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight })
   }, [messages])
 
+  // Opening the panel must move focus into it, or a keyboard user has to tab
+  // through the whole page to reach the dialog they just opened.
   useEffect(() => {
     if (!isOpen) return
+    inputRef.current?.focus()
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsOpen(false)
         triggerRef.current?.focus()
+        return
+      }
+      if (event.key !== 'Tab' || !panelRef.current) return
+
+      // aria-modal alone does not stop Tab reaching the page behind the panel.
+      const focusable = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+      ).filter((element) => element.offsetParent !== null)
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
       }
     }
+
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [isOpen])
@@ -167,6 +199,7 @@ export function SupportChat() {
               {t('chat_ph')}
             </label>
             <input
+              ref={inputRef}
               id="chat-input"
               className={styles.input}
               value={draft}

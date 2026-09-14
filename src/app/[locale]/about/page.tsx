@@ -94,7 +94,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
             {SHOP.instagramHandle}
           </a>
           <a href={SHOP.facebook} target="_blank" rel="noopener noreferrer">
-            Facebook
+            {t('social_facebook')}
           </a>
         </div>
       </section>

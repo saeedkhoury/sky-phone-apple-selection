@@ -1,6 +1,6 @@
 export type Theme = 'light' | 'dark' | 'auto'
 
-export const THEME_STORAGE_KEY = 'axiom.theme'
+export const THEME_STORAGE_KEY = 'skyphone.theme'
 
 const THEMES: readonly Theme[] = ['light', 'dark', 'auto']
 const DEFAULT_THEME: Theme = 'dark'

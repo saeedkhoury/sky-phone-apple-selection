@@ -27,6 +27,9 @@ export async function generateMetadata({
   if (!isLocale(locale)) return {}
 
   return {
+    // Set so Open Graph image URLs resolve absolutely rather than off
+    // localhost. Point this at the real domain before going live.
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://skyphone.example'),
     title: `${SHOP.name} — ${translate(locale, 'nav_products')}`,
     description: translate(locale, 'ab_lead'),
     icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },

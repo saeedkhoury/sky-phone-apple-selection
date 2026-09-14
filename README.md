@@ -1,23 +1,10 @@
-# Axiom Store
+# Sky Phone
 
-An online store for tech and gadgets, built to mirror the design language of
-`developer.apple.com` — the same chrome, type scale, spacing rhythm, motion and
-colour system.
+A storefront for Sky Phone — a phone, tablet, computer and gaming shop with
+same-day repairs in Kafr Kanna, established 2010.
 
-## Design provenance
-
-The design tokens in [`src/styles/tokens.css`](src/styles/tokens.css) were
-transcribed from Apple's live production stylesheets (`globalnav.css`,
-`dark-mode.css`, `footer.dist.css`, `home-alt.css`) rather than estimated by
-eye — nav height 48/44px, `rgba(22,22,23,0.8)` with `saturate(180%) blur(20px)`,
-fill blue `#0071E3`, surfaces `#000`/`#161617`/`#1d1d1f`, 17px nav type,
-`-0.022em` display tracking, `cubic-bezier(0.4, 0, 0.6, 1)` easing, and Apple's
-1068 / 833 / 767 / 734px breakpoints.
-
-**No Apple intellectual property is reproduced here** — no logos, wordmarks,
-product photography, or marketing copy. Product imagery is generated SVG
-([`ProductArt.tsx`](src/components/product/ProductArt.tsx)). The brand, catalog
-and copy are placeholders ("Axiom") for you to replace.
+Trilingual (Hebrew, Arabic, English) with full right-to-left support, built on
+the visual language of `developer.apple.com`.
 
 ## Getting started
 
@@ -26,72 +13,96 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:3000.
+Opens at http://localhost:3000, which redirects to the visitor's best language —
+Hebrew by default.
+
+First E2E run also needs `npx playwright install chromium`.
 
 ## Scripts
 
 | Command | What it does |
 |---|---|
 | `npm run dev` | Dev server |
-| `npm run build` | Production build |
+| `npm run build` | Production build (117 static pages) |
 | `npm test` | Unit + integration tests (Vitest) |
 | `npm run test:coverage` | Coverage, gated at 80% on `src/lib` |
 | `npm run test:e2e` | End-to-end journeys (Playwright) |
 | `npm run lint` | ESLint |
 
-First E2E run needs `npx playwright install chromium`.
-
-## Architecture
+## How it is put together
 
 ```
 src/
-  app/                 routes: home, store/[category], product/[slug],
-                       search, cart, checkout, support
+  app/[locale]/        every page, statically generated per language:
+                       home, store/[category], product/[slug], repairs,
+                       about, cart, search
+  middleware.ts        sends bare paths to a language
   components/
-    nav/               sticky blurred nav, mega-menu flyouts, search takeover,
-                       mobile hamburger
+    nav/               blurred sticky nav, mega-menu, search, language switcher
     footer/            multi-column footer, mobile accordions, theme toggle
-    hero/              auto-rotating hero carousel
+    hero/              hero carousel
     tiles/             product tiles and the responsive grid
-    product/           detail view, variant picker, generated artwork
-    ui/                Button, SectionHeader
+    product/           detail view, colour and storage pickers, gallery
+    repairs/           services strip and line icons
+    reels/             the shop's own video clips
+    chat/              rule-based support assistant
   lib/
-    cart/              pure immutable reducer + selectors + provider
-    catalog/           typed catalog data, search/filter/sort
-    checkout/          shipping-form validation
-    format/            currency (integer cents)
-    theme/             external theme store (useSyncExternalStore)
-  styles/tokens.css    the design tokens
-e2e/                   Playwright journeys
-docs/testing/          TDD evidence report
+    catalog/           27 SKUs, categories, brands, search and filtering
+    cart/              pure immutable reducer + provider
+    repairs/           the seven services
+    chat/              intent matching
+    format/            currency (whole shekels)
+    i18n/              locale config + the HE/AR/EN message decks
+    theme/             external theme store
+public/img, public/video   product photography and shop clips
 ```
 
-### Conventions worth knowing
+### Decisions worth knowing
 
-- **Money is always integer cents.** It is converted to a decimal string only at
-  display time, so rounding never accumulates across cart lines.
-- **The cart reducer is pure and never mutates.** Lines are keyed by product
-  *and* variant, so two configurations of one product stay separate.
-- **Persisted cart state is untrusted.** `localStorage` is user-writable, so
-  `HYDRATE` validates every line and drops anything malformed.
-- **Theme lives outside React** in a module-level store read through
-  `useSyncExternalStore`, with a blocking inline script applying it before first
-  paint so there is no flash of the wrong palette.
+- **Money is whole shekels.** The shop prices in round shekels, so there is no
+  minor unit to carry. There is deliberately **no tax line**: Israeli consumer
+  prices are VAT-inclusive by law, so the shelf price is the price paid.
+- **There is no card checkout.** The shop confirms orders over WhatsApp and
+  takes payment in store, so the bag composes a real order message rather than
+  simulating a payment it cannot process.
+- **Repairs carry no prices.** All seven services are listed and each routes to
+  a real quote. The owner asked for indicative pricing to be left off; tests
+  assert that no shekel sign appears on the repairs page in any language, and
+  that the assistant never quotes one. Do not reintroduce prices without asking
+  him — an indicative number becomes a promise in the customer's head.
+- **Language is a route, not state.** `/he`, `/ar`, `/en` each render on the
+  server with the right `lang` and `dir`, so every page is statically
+  generated per language and the switcher is a normal navigation.
+- **RTL uses logical CSS properties** (`inset-inline-*`, `margin-inline-*`,
+  `text-align: start`). A physical `left`/`right` is a layout bug in two of the
+  three languages.
+- **Theme lives outside React** in a module store read via
+  `useSyncExternalStore`, with a blocking inline script so there is no flash of
+  the wrong palette.
 
-## Status and limits
+## Content and rights
 
-- Checkout **takes no payment**. It validates delivery details and records the
-  order locally. Wire up a payment provider before taking real orders.
-- There is no backend, no accounts and no order history. The catalog is local
-  typed data in [`src/lib/catalog/products.ts`](src/lib/catalog/products.ts).
-- E2E runs on Chromium only.
+- Copy is the shop's own approved trilingual deck (285 keys × 3 languages) in
+  `src/lib/i18n/messages/`. Five interface strings (theme switcher labels and a
+  social label) were added for this build; everything else is carried over.
+- Shop details in `src/lib/shop.ts` were verified against the shop's public
+  Instagram. Do not replace them with placeholders.
+- **Product imagery is mixed provenance.** Most photos come from Wikimedia
+  Commons; some are official manufacturer imagery supplied by the shop owner.
+  Using manufacturer photography is normal practice for a retailer selling
+  those products, but it is not a licence — if a specific image is ever
+  challenged, swap it. Nothing here is presented as Sky Phone's own photography.
 
-## Making it yours
+## Known gaps
 
-1. Replace the catalog in `src/lib/catalog/products.ts`.
-2. Find and replace the "Axiom" brand name (nav, footer, metadata, README).
-3. Swap generated artwork for real photography by replacing `ProductArt` usage
-   in `ProductTile`, `HeroCarousel`, `ProductDetail` and `SearchOverlay`.
-4. Adjust `TAX_RATE` in `src/lib/format/currency.ts` for your jurisdiction.
-5. Remove the demonstration disclaimer in `GlobalFooter.tsx` and the
-   payment notice in `src/app/checkout/page.tsx`.
+- **Opening hours are unconfirmed.** They were never published publicly and are
+  carried over from the previous site as a placeholder. Confirm them with the
+  owner before this goes live — they appear on the About page and in the
+  assistant.
+- **The iPhone 17 Pro / Pro Max images are synthetic mockups with blank
+  screens**, not photographs. Replacements were supplied at only 225×225, too
+  small for the gallery. These are the next images to replace.
+- E2E runs on Chromium only; there is no visual-regression baseline.
+- No backend: the catalogue is local typed data and the cart lives in
+  `localStorage`. Adding a product means editing
+  `src/lib/catalog/products.ts`.

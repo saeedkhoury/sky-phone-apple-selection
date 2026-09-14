@@ -13,7 +13,7 @@ import { cartReducer, emptyCart } from './reducer'
 import { selectLineCount, selectSubtotal } from './selectors'
 import type { CartItemInput, CartState } from './types'
 
-const STORAGE_KEY = 'axiom.cart.v1'
+const STORAGE_KEY = 'skyphone.cart.v1'
 
 interface CartContextValue {
   state: CartState
