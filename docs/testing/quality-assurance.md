@@ -11,7 +11,7 @@ different product and is not release evidence for this project.
 | Code quality | ESLint | TypeScript/React and framework-quality issues. |
 | Business logic | Vitest | Currency formatting, catalogue queries, cart state, support responses, reduced motion, and theme state. |
 | Coverage | Vitest + V8 | An 80% threshold for the reusable logic in `src/lib`. |
-| Customer journeys | Playwright + Chromium | Language/RTL rendering, catalogue, filters, hero artwork, bag/WhatsApp handoff, repairs, navigation, chat accessibility, and theme behavior. |
+| Customer journeys | Playwright + Chromium | Language/RTL rendering, catalogue, filters, hero artwork and continuous looping, seven-second autoplay, bag/WhatsApp handoff, repairs, navigation, chat accessibility, and theme behavior. |
 | Production safety | Next.js build | Route generation, type checking, and production compilation. |
 
 ## Release verification
@@ -31,6 +31,10 @@ The GitHub workflow runs the same baseline checks on pushes and pull requests.
 The Pages deployment additionally runs `npm run build:pages` and
 `npm run test:pages` against the static export before publishing. See the
 [hosting guide](../hosting.md) for the public-URL verification command.
+The shared hero regression suite exercises repeated forward/backward loops in
+all three languages, mobile dragging, seven-second holds, continued playback
+after manual navigation, and the explicit pause/resume control. Reduced-motion
+mode keeps the seven-second cadence but changes slides without sliding animation.
 For deployments, also complete the manual smoke tests in
 [Owner Approval & Launch Checklist](../owner-approval-and-launch.md).
 

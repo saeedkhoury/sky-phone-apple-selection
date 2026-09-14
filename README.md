@@ -35,6 +35,10 @@ navigation, and the browser-local bag are included. See the
   payment checkout.
 - Accessible navigation, theme handling, carousel controls, security headers,
   Vitest coverage, and Playwright Chromium journeys.
+- Continuously looping hero blocks: horizontal scrolling and dragging in both
+  directions, automatic seven-second holds, and an explicit pause/resume control.
+  Manual navigation keeps autoplay enabled; reduced-motion mode removes the
+  sliding animation while preserving the seven-second cadence.
 
 ## Start locally
 
