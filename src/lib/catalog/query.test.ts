@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { searchProducts, filterByCategory, sortProducts, getProductBySlug } from './query'
+import {
+  searchProducts,
+  filterByCategory,
+  sortProducts,
+  getProductBySlug,
+  getFeaturedProducts,
+  getProductsByCategory,
+} from './query'
 import { products, categories } from './products'
 
 describe('catalog data integrity', () => {
@@ -118,5 +125,27 @@ describe('getProductBySlug', () => {
 
   it('returns undefined for an unknown slug', () => {
     expect(getProductBySlug('no-such-product')).toBeUndefined()
+  })
+})
+
+describe('featured and category helpers', () => {
+  it('sorts featured products ahead of the rest', () => {
+    const sorted = sortProducts(products, 'featured')
+    const firstNonFeatured = sorted.findIndex((p) => !p.featured)
+    const lastFeatured = sorted.map((p) => !!p.featured).lastIndexOf(true)
+    expect(lastFeatured).toBeLessThan(firstNonFeatured === -1 ? Infinity : firstNonFeatured)
+  })
+
+  it('returns only products flagged as featured', () => {
+    expect(getFeaturedProducts().every((p) => p.featured)).toBe(true)
+  })
+
+  it('returns at least one featured product for the home page', () => {
+    expect(getFeaturedProducts().length).toBeGreaterThan(0)
+  })
+
+  it('looks up products by category from the full catalog', () => {
+    const id = categories[0].id
+    expect(getProductsByCategory(id).every((p) => p.categoryId === id)).toBe(true)
   })
 })

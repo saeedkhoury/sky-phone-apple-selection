@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { cartReducer, emptyCart, MAX_LINE_QUANTITY } from './reducer'
-import { selectSubtotal, selectLineCount, selectLine } from './selectors'
+import {
+  selectSubtotal,
+  selectLineCount,
+  selectLine,
+  selectIsEmpty,
+} from './selectors'
 import type { CartState } from './types'
 
 const item = {
@@ -203,5 +208,15 @@ describe('cart selectors', () => {
 
   it('returns undefined for a missing line', () => {
     expect(selectLine(emptyCart, 'nope', 'nope')).toBeUndefined()
+  })
+})
+
+describe('selectIsEmpty', () => {
+  it('reports an empty cart as empty', () => {
+    expect(selectIsEmpty(emptyCart)).toBe(true)
+  })
+
+  it('reports a cart with lines as not empty', () => {
+    expect(selectIsEmpty(addOnce())).toBe(false)
   })
 })
