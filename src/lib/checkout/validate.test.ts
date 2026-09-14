@@ -73,4 +73,27 @@ describe('validateShipping', () => {
   it('rejects an over-long field to bound stored input', () => {
     expect(validateShipping({ ...valid, city: 'x'.repeat(300) }).isValid).toBe(false)
   })
+
+  it('rejects an over-long name', () => {
+    const result = validateShipping({ ...valid, fullName: 'x'.repeat(300) })
+    expect(result.errors.fullName).toMatch(/too long/i)
+  })
+
+  it('rejects an over-long but otherwise well-formed email', () => {
+    const result = validateShipping({
+      ...valid,
+      email: `${'x'.repeat(220)}@example.com`,
+    })
+    expect(result.errors.email).toMatch(/too long/i)
+  })
+
+  it('rejects an over-long address', () => {
+    const result = validateShipping({ ...valid, address: 'x'.repeat(300) })
+    expect(result.errors.address).toMatch(/too long/i)
+  })
+
+  it('rejects an over-long postcode', () => {
+    const result = validateShipping({ ...valid, postcode: 'x'.repeat(300) })
+    expect(result.errors.postcode).toMatch(/too long/i)
+  })
 })
